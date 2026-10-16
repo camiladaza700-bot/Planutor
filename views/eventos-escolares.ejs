@@ -4,45 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Muro de avisos - PLANUTOR</title>
-  <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: Arial, sans-serif; background:#f7ede2; color:#2d2d2d; padding:24px; }
-    .contenedor { max-width: 1000px; margin: 0 auto; }
-    .hero, .panel, .lista-box { background:#fff; border-radius:22px; box-shadow:0 10px 30px rgba(0,0,0,0.12); }
-    .hero { padding:28px; margin-bottom:24px; }
-    .panel { padding:24px; margin-bottom:24px; }
-    .lista-box { padding:24px; }
-    h1 { color:#84a59d; margin-bottom:8px; }
-    p { line-height:1.5; }
-    .alerta { margin-top:16px; padding:12px 14px; border-radius:10px; font-size:14px; }
-    .ok { background:#e3f2ed; color:#2f665a; }
-    .error { background:#fde2e1; color:#8f2d2c; }
-    .acciones { margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; }
-    .acciones a { text-decoration:none; padding:10px 14px; border-radius:10px; background:#84a59d; color:#fff; font-weight:bold; }
-    label { display:block; margin:14px 0 6px; font-weight:bold; }
-    input, textarea, select { width:100%; padding:12px; border:1px solid #d5cec8; border-radius:10px; font-size:15px; }
-    textarea { min-height:80px; resize:vertical; }
-    button { margin-top:18px; border:none; border-radius:12px; background:#f28482; color:#fff; padding:12px 18px; font-weight:bold; font-size:15px; cursor:pointer; }
-    .lista { display:grid; gap:16px; margin-top:12px; }
-    .evento { border:1px solid #f0ece7; border-radius:16px; padding:18px; }
-    .meta { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
-    .chip { padding:6px 10px; border-radius:999px; font-size:13px; font-weight:bold; }
-    .tipo { background:#fce7d6; color:#945f35; }
-    .autor { background:#e8eef7; color:#3f5b88; }
-    .borrar { background:none; color:#8f2d2c; text-decoration:underline; padding:0; margin-top:10px; font-weight:normal; font-size:13px; }
-    .vacio { color:#6b625b; }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
   <main class="contenedor">
     <section class="hero">
       <h1>Muro de avisos generales</h1>
       <p>Avisos generales publicados por profesores y coordinadores para mantener informada a toda la comunidad educativa.</p>
       <% if (mensaje) { %><div class="alerta ok"><%= mensaje %></div><% } %>
       <% if (error) { %><div class="alerta error"><%= error %></div><% } %>
-      <div class="acciones">
-        <a href="/panel/<%= currentUser.id %>">Volver al inicio</a>
-      </div>
     </section>
 
     <% if (puedeAgregar) { %>

@@ -4,83 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agregar clase - PLANUTOR</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7ede2;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .contenedor {
-      background: white;
-      width: 100%;
-      max-width: 500px;
-      padding: 35px;
-      border-radius: 18px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    h1 {
-      color: #f28482;
-      margin-bottom: 12px;
-    }
-
-    p {
-      color: #555;
-      margin-bottom: 25px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 18px;
-      text-align: center;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 15px;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      background-color: #f28482;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .volver {
-      display: inline-block;
-      margin-top: 20px;
-      color: #333;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
 
-<body>
+<body class="pagina-tarjeta">
+  <%- include('partials/menu') %>
 
   <div class="contenedor">
 
@@ -89,6 +17,13 @@
     <p>
       Ingresa el código que te dio tu profesor.
     </p>
+
+    <% if (mensaje) { %>
+      <div class="alerta ok"><%= mensaje %></div>
+    <% } %>
+    <% if (error) { %>
+      <div class="alerta error"><%= error %></div>
+    <% } %>
 
     <form action="/clases/unirse" method="POST">
 
@@ -111,6 +46,24 @@
       </button>
 
     </form>
+
+    <section class="seccion">
+      <h2>Mis clases inscritas</h2>
+      <% if (clases.length === 0) { %>
+        <p>Aún no estás inscrito en ninguna clase.</p>
+      <% } else { %>
+        <% clases.forEach(clase => { %>
+          <article class="clase">
+            <h3><%= clase.nombre %></h3>
+            <p><strong>Grado:</strong> <%= clase.grado %></p>
+            <p><strong>Profesor:</strong> <%= clase.profesor_nombre %></p>
+            <form action="/clases/estudiante/<%= estudiante.id %>/<%= clase.id %>/salir" method="POST" onsubmit="return confirm('¿Salir de esta clase? Ya no verás sus tareas.');">
+              <button type="submit" class="borrar">Salir de la clase</button>
+            </form>
+          </article>
+        <% }) %>
+      <% } %>
+    </section>
 
     <a
       class="volver"

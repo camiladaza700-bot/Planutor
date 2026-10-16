@@ -4,123 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mis clases - PLANUTOR</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7ede2;
-      min-height: 100vh;
-      padding: 30px;
-    }
-
-    .contenedor {
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    h1 {
-      color: #f28482;
-      margin-bottom: 10px;
-    }
-
-    .bienvenida {
-      margin-bottom: 25px;
-      color: #555;
-    }
-
-    .crear-clase {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .crear-clase h2 {
-      margin-bottom: 18px;
-      color: #333;
-    }
-
-    form {
-      display: grid;
-      gap: 12px;
-    }
-
-    input,
-    button {
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    input {
-      border: 1px solid #ccc;
-    }
-
-    button {
-      border: none;
-      background-color: #f28482;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .clases {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-
-    .clase {
-      background: white;
-      padding: 22px;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .clase h3 {
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .clase p {
-      margin: 8px 0;
-      color: #555;
-    }
-
-    .codigo {
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #f7ede2;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      color: #333;
-    }
-
-    .volver {
-      display: inline-block;
-      margin-top: 30px;
-      text-decoration: none;
-      color: #333;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
 
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
 
   <div class="contenedor">
 
@@ -129,6 +17,13 @@
     <p class="bienvenida">
       Profesor: <strong><%= profesor.nombre %></strong>
     </p>
+
+    <% if (mensaje) { %>
+      <div class="alerta ok"><%= mensaje %></div>
+    <% } %>
+    <% if (error) { %>
+      <div class="alerta error"><%= error %></div>
+    <% } %>
 
     <section class="crear-clase">
       <h2>Crear una nueva clase</h2>
@@ -194,13 +89,11 @@
               </div>
               <p>Comparte este código con tus estudiantes.</p>
 
-<a href="/clases/profesor/<%= profesor.id %>/<%= clase.id %>">
-  Entrar a la clase
-</a>
+              <p><a href="/clases/profesor/<%= profesor.id %>/<%= clase.id %>">Gestionar clase y estudiantes</a></p>
 
-              <p>
-                Comparte este código con tus estudiantes.
-              </p>
+              <form action="/clases/profesor/<%= profesor.id %>/<%= clase.id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta clase? También se eliminarán sus tareas y el progreso registrado de los estudiantes.');">
+                <button type="submit" class="borrar">Eliminar clase</button>
+              </form>
 
             </div>
 

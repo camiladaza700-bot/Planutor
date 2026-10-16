@@ -5,127 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>PLANUTOR - Inicio</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7ede2;
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .barra {
-            background: white;
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        }
-
-        .logo {
-            color: #84a59d;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .usuario {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .foto {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #f5cac3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .contenido {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 25px;
-        }
-
-        .bienvenida {
-            margin-bottom: 35px;
-        }
-
-        .bienvenida h1 {
-            margin-bottom: 10px;
-        }
-
-        .bienvenida p {
-            color: #666;
-            font-size: 17px;
-        }
-
-        .tarjetas {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .tarjeta {
-            background: white;
-            padding: 30px;
-            border-radius: 18px;
-            text-decoration: none;
-            color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .tarjeta:hover {
-            transform: translateY(-4px);
-        }
-
-        .icono {
-            font-size: 35px;
-            margin-bottom: 15px;
-        }
-
-        .tarjeta h2 {
-            margin-bottom: 8px;
-        }
-
-        .tarjeta p {
-            color: #777;
-        }
-
-        .actividades {
-            background: white;
-            margin-top: 30px;
-            padding: 30px;
-            border-radius: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .actividad {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .fecha {
-            color: #f28482;
-            font-weight: bold;
-        }
-    </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
 
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
 
     <header class="barra">
 
@@ -154,41 +38,41 @@
 
         <section class="tarjetas">
 
-            <a href="#" class="tarjeta">
+            <a href="/clases/estudiante/<%= currentUser.id %>" class="tarjeta">
                 <div class="icono"></div>
                 <h2>Mis materias</h2>
-                <p>Consulta tus materias.</p>
+                <p>Consulta y únete a tus clases.</p>
             </a>
 
-            <a href="#" class="tarjeta">
+            <a href="/panel/<%= currentUser.id %>#tareas" class="tarjeta">
                 <div class="icono"></div>
                 <h2>Tareas</h2>
                 <p>Revisa tus actividades.</p>
             </a>
 
-            <a href="/calendario?personaje=estudiante" class="tarjeta">
+            <a href="/calendario?personaje=estudiante&amp;usuarioId=<%= currentUser.id %>" class="tarjeta">
                 <div class="icono"></div>
                 <h2>Calendario</h2>
                 <p>Organiza tus fechas.</p>
             </a>
 
-            <a href="#" class="tarjeta">
+            <article class="tarjeta">
                 <div class="icono"></div>
                 <h2>Mi progreso</h2>
-                <p>Consulta tu avance.</p>
-            </a>
+                <p>Esta función estará disponible próximamente.</p>
+            </article>
 
-            <a href="#" class="tarjeta">
+            <article class="tarjeta">
                 <div class="icono"></div>
                 <h2>Mi historial</h2>
-                <p>Consulta tus actividades anteriores.</p>
-            </a>
+                <p>Esta función estará disponible próximamente.</p>
+            </article>
 
-            <a href="#" class="tarjeta">
+            <article class="tarjeta">
                 <div class="icono"></div>
                 <h2>Mi perfil</h2>
-                <p>Consulta tus datos.</p>
-            </a>
+                <p>Esta función estará disponible próximamente.</p>
+            </article>
 
         </section>
 

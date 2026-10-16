@@ -4,119 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario - PLANUTOR V2</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background:#f7ede2; color:#2d2d2d; padding:24px; }
-        .contenedor { max-width: 1100px; margin: 0 auto; }
-        h1 { color:#84a59d; margin-bottom: 6px; }
-        .aviso {
-            padding:10px 14px; border-radius:10px; font-size:0.85em; margin-bottom:16px;
-        }
-        .aviso.guardando { background:#e3f2ed; color:#2f665a; }
-        .aviso.invitado { background:#fde2e1; color:#8f2d2c; }
-
-        .calendar-wrap { display:flex; gap:20px; margin-top:12px; flex-wrap: wrap; }
-
-        .calendar {
-            flex: 1 1 680px;
-            background:#fff; border-radius:18px; padding:20px;
-            box-shadow:0 6px 20px rgba(0,0,0,0.08);
-        }
-
-        .cal-header {
-            display:flex; justify-content:space-between; align-items:center;
-            margin-bottom: 14px;
-        }
-        .cal-header button {
-            border:none; background:#84a59d; color:#fff; width:36px; height:36px;
-            border-radius:50%; font-size:16px; cursor:pointer;
-        }
-        .cal-header button:hover { background:#6f8f87; }
-        #cal-month { font-size: 20px; color:#2d2d2d; text-transform: capitalize; }
-
-        .hoy-btn {
-            border:none; background:#f28482; color:#fff; padding:8px 14px;
-            border-radius:10px; cursor:pointer; font-weight:bold; font-size:13px;
-        }
-        .hoy-btn:hover { background:#d96e6c; }
-
-        .cal-weekdays {
-            display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
-            margin-bottom:6px;
-        }
-        .cal-weekdays div {
-            text-align:center; font-weight:bold; font-size:0.85em; color:#84a59d;
-        }
-
-        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-        .cal-cell {
-            min-height:96px; border:1px solid #f0ece7; padding:6px;
-            border-radius:8px; background:#fff; cursor:pointer;
-            display:flex; flex-direction:column; transition: background .15s;
-        }
-        .cal-cell.empty { background:#fafafa; cursor:default; }
-        .cal-cell:not(.empty):hover { background:#f7fbff; }
-        .cal-cell.selected { outline:2px solid #84a59d; background:#eef7f4; }
-        .cal-cell.today { border:2px solid #f28482; }
-        .cal-cell .date { font-weight:700; font-size:0.9em; }
-        .cal-cell.today .date {
-            color:#fff; background:#f28482; border-radius:50%;
-            width:22px; height:22px; display:flex; align-items:center;
-            justify-content:center; font-size:0.8em;
-        }
-
-        .note {
-            background:#f7fbff; border-left:4px solid #3498db; padding:3px 5px;
-            margin-top:4px; border-radius:4px; font-size:0.75em;
-            overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-        }
-        .note.inicial { border-left-color:#f28482; background:#fff2f1; }
-        .note-more { font-size:0.7em; color:#888; margin-top:2px; }
-
-        .sidebar {
-            flex: 1 1 260px; max-width: 320px;
-            background:#fff; border-radius:18px; padding:20px;
-            box-shadow:0 6px 20px rgba(0,0,0,0.08); align-self:flex-start;
-        }
-        .sidebar h3 { margin-top:0; color:#84a59d; }
-        .sidebar h4 { margin-top: 18px; color:#2d2d2d; }
-        .sidebar label { display:block; margin-top:10px; font-weight:bold; font-size:0.9em; }
-        .sidebar input[type=text] {
-            width:100%; padding:10px; border:1px solid #d5cec8; border-radius:10px;
-            margin-top:4px; font-size:14px;
-        }
-        .add-btn {
-            margin-top:10px; width:100%; border:none; border-radius:10px;
-            background:#84a59d; color:#fff; padding:11px; font-weight:bold;
-            cursor:pointer;
-        }
-        .add-btn:hover { background:#6f8f87; }
-        .add-btn:disabled { background:#c8c8c8; cursor:not-allowed; }
-
-        #selected-label { font-size:0.85em; color:#666; margin-top:6px; }
-
-        #quick-list { list-style:none; padding:0; margin-top:8px; }
-        #quick-list li {
-            display:flex; justify-content:space-between; align-items:center;
-            background:#f7ede2; padding:8px 10px; border-radius:8px;
-            margin-bottom:6px; font-size:0.85em;
-        }
-        #quick-list button {
-            border:none; background:transparent; color:#f28482; cursor:pointer;
-            font-weight:bold; font-size:14px;
-        }
-        #quick-list li.vacio { background:transparent; color:#999; text-align:center; }
-
-        .volver { display:inline-block; margin-top:18px; color:#84a59d; text-decoration:none; font-weight:bold; }
-        .volver:hover { text-decoration:underline; }
-
-        @media (max-width: 720px) {
-            .calendar, .sidebar { flex: 1 1 100%; max-width: 100%; }
-        }
-    </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
   <div class="contenedor">
     <h1>Calendario - <%= personaje %></h1>
 
@@ -168,7 +59,8 @@
         // Si no hay sesión, se usa localStorage como respaldo temporal.
         const personaje = '<%= personaje %>';
         const currentUserId = <%- currentUserId ? currentUserId : 'null' %>;
-        const eventosIniciales = <%- JSON.stringify(eventos || []) %>;
+        const eventosEscolares = <%- JSON.stringify(eventos || []) %>;
+        const anotacionesPlaneador = <%- JSON.stringify(typeof anotacionesPlaneador !== 'undefined' ? anotacionesPlaneador : []) %>;
 
         function toISO(d) {
             const y = d.getFullYear();
@@ -180,6 +72,34 @@
         const hoy = new Date();
         const hoyISO = toISO(hoy);
         const state = { date: new Date(hoy.getFullYear(), hoy.getMonth(), 1), selected: null, notas: {} };
+
+        const eventosPorFecha = eventosEscolares.reduce((mapa, evento) => {
+            mapa[evento.fecha] = mapa[evento.fecha] || [];
+            mapa[evento.fecha].push({
+                ...evento,
+                origen: 'escolar'
+            });
+            return mapa;
+        }, {});
+
+        const planeadorPorFecha = anotacionesPlaneador
+            .filter(anotacion => anotacion.estado !== 'archivada')
+            .reduce((mapa, anotacion) => {
+                mapa[anotacion.fecha] = mapa[anotacion.fecha] || [];
+                mapa[anotacion.fecha].push({
+                    ...anotacion,
+                    origen: 'planeador'
+                });
+                return mapa;
+            }, {});
+
+        function elementosDelDia(fecha) {
+            return [
+                ...(eventosPorFecha[fecha] || []),
+                ...(planeadorPorFecha[fecha] || []),
+                ...(state.notas[fecha] || [])
+            ];
+        }
 
         // ---------- Respaldo local (solo si no hay sesión) ----------
         function keyFor() { return 'planner_guest'; }
@@ -218,23 +138,9 @@
         // ---------- Carga inicial de datos ----------
         async function cargarDatos() {
             if (currentUserId) {
-                // Sembrar eventos iniciales del backend (idempotente)
-                for (const e of eventosIniciales) {
-                    try { await apiCrear(e.fecha, e.titulo, 'inicial'); } catch (err) { console.error(err); }
-                }
                 state.notas = await apiListar();
             } else {
-                const data = loadLocal();
-                let cambiado = false;
-                eventosIniciales.forEach(e => {
-                    data[e.fecha] = data[e.fecha] || [];
-                    if (!data[e.fecha].some(x => x.titulo === e.titulo)) {
-                        data[e.fecha].push({ titulo: e.titulo, origen: 'inicial' });
-                        cambiado = true;
-                    }
-                });
-                if (cambiado) saveLocal(data);
-                state.notas = data;
+                state.notas = loadLocal();
             }
         }
 
@@ -295,10 +201,10 @@
                 dateEl.textContent = day;
                 cell.appendChild(dateEl);
 
-                const notes = state.notas[iso] || [];
+                const notes = elementosDelDia(iso);
                 notes.slice(0, 3).forEach(n => {
                     const nEl = document.createElement('div');
-                    nEl.className = 'note' + (n.origen === 'inicial' ? ' inicial' : '');
+                    nEl.className = 'note' + (n.origen === 'escolar' || n.origen === 'inicial' || n.origen === 'planeador' ? ' inicial' : '');
                     nEl.textContent = n.titulo;
                     cell.appendChild(nEl);
                 });
@@ -331,7 +237,7 @@
                 list.innerHTML = '<li class="vacio">Selecciona un día primero.</li>';
                 return;
             }
-            const items = state.notas[state.selected] || [];
+            const items = elementosDelDia(state.selected);
             if (items.length === 0) {
                 list.innerHTML = '<li class="vacio">Sin notas para este día.</li>';
                 return;
@@ -339,25 +245,31 @@
             items.forEach((it, idx) => {
                 const li = document.createElement('li');
                 const span = document.createElement('span');
-                span.textContent = it.titulo + (it.origen === 'inicial' ? ' (evento)' : '');
+                const tipo = it.origen === 'escolar' || it.origen === 'inicial'
+                    ? ' (evento)'
+                    : it.origen === 'planeador' ? ' (planeador)' : '';
+                span.textContent = it.titulo + tipo;
                 li.appendChild(span);
 
-                const del = document.createElement('button');
-                del.textContent = '✕';
-                del.title = 'Eliminar nota';
-                del.addEventListener('click', async () => {
-                    del.disabled = true;
-                    try {
-                        await eliminarNota(state.selected, idx);
-                        renderCalendar();
-                        renderQuickList();
-                    } catch (err) {
-                        console.error(err);
-                        alert('No se pudo eliminar la nota. Intenta de nuevo.');
-                        del.disabled = false;
-                    }
-                });
-                li.appendChild(del);
+                if (it.origen === 'personal') {
+                    const notaIdx = (state.notas[state.selected] || []).indexOf(it);
+                    const del = document.createElement('button');
+                    del.textContent = '✕';
+                    del.title = 'Eliminar nota';
+                    del.addEventListener('click', async () => {
+                        del.disabled = true;
+                        try {
+                            await eliminarNota(state.selected, notaIdx);
+                            renderCalendar();
+                            renderQuickList();
+                        } catch (err) {
+                            console.error(err);
+                            alert('No se pudo eliminar la nota. Intenta de nuevo.');
+                            del.disabled = false;
+                        }
+                    });
+                    li.appendChild(del);
+                }
                 list.appendChild(li);
             });
         }

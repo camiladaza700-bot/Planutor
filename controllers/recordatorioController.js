@@ -17,23 +17,83 @@ async function listar(req, res) {
       return;
     }
 
+    const preferencia = await Recordatorio.obtenerPreferencia(usuario.id);
     let recordatorios = [];
 
     if (usuario.rol === 'profesor') {
-      recordatorios = await Recordatorio.obtenerParaProfesor(usuario.id);
+      recordatorios = await Recordatorio.obtenerParaProfesor(
+        usuario.id,
+        preferencia.dias_anticipacion
+      );
     } else if (usuario.rol === 'estudiante') {
       recordatorios = await Recordatorio.obtenerParaEstudiante({
         estudianteId: usuario.id,
         grado: usuario.grado,
         grupo: usuario.grupo
-      });
+      }, preferencia.dias_anticipacion);
     }
 
-    res.json({ recordatorios });
+    res.json({ recordatorios, preferencia });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'No fue posible obtener los recordatorios.' });
   }
 }
 
-module.exports = { listar };
+async function mostrarPagina(req, res) {
+  const usuarioId = Number(req.params.userId);
+
+  try {
+    const usuario = await Usuario.buscarPorId(usuarioId);
+    if (!usuario || !['profesor', 'estudiante'].includes(usuario.rol)) {
+      return res.status(404).send('Usuario no encontrado.');
+    }
+
+    const preferencia = await Recordatorio.obtenerPreferencia(usuario.id);
+    const recordatorios = usuario.rol === 'profesor'
+      ? await Recordatorio.obtenerParaProfesor(usuario.id, preferencia.dias_anticipacion)
+      : await Recordatorio.obtenerParaEstudiante({
+          estudianteId: usuario.id,
+          grado: usuario.grado,
+          grupo: usuario.grupo
+        }, preferencia.dias_anticipacion);
+
+    res.render('recordatorios', {
+      usuario,
+      recordatorios,
+      preferencia,
+      mensaje: req.query.mensaje || ''
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('No fue posible cargar los recordatorios.');
+  }
+}
+
+async function guardarConfiguracion(req, res) {
+  const usuarioId = Number(req.params.userId);
+  const dias = Number(req.body.diasAnticipacion);
+
+  if (![1, 3, 7].includes(dias)) {
+    return res.status(400).send('La anticipación debe ser de 1, 3 o 7 días.');
+  }
+
+  try {
+    const usuario = await Usuario.buscarPorId(usuarioId);
+    if (!usuario || !['profesor', 'estudiante'].includes(usuario.rol)) {
+      return res.status(404).send('Usuario no encontrado.');
+    }
+
+    await Recordatorio.guardarPreferencia({
+      usuarioId,
+      correoActivo: req.body.correoActivo === 'on',
+      diasAnticipacion: dias
+    });
+    res.redirect(`/recordatorios/${usuarioId}?mensaje=Preferencias+actualizadas.`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('No fue posible guardar las preferencias.');
+  }
+}
+
+module.exports = { listar, mostrarPagina, guardarConfiguracion };

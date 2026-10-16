@@ -1,5 +1,9 @@
 const Usuario = require('../models/usuarioModel');
 const Tarea = require('../models/tareaModel');
+const Clase = require('../models/claseModel');
+const Institucion = require('../models/institucionModel');
+const crypto = require('crypto');
+const { enviarCorreo } = require('../config/correo');
 
 function normalizarTexto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -100,11 +104,16 @@ async function renderPanelUsuario(res, usuario, datos = {}) {
   const semana = Tarea.obtenerRangoSemanaActual();
 
   if (usuario.rol === 'administrador') {
-    const usuarios = await Usuario.obtenerTodos();
+    const [usuarios, instituciones] = await Promise.all([
+      Usuario.obtenerTodos(),
+      Institucion.obtenerTodas()
+    ]);
 
     res.render('usuarios', {
       usuarios,
+      instituciones,
       currentUser: usuario,
+      bienvenida: datos.bienvenida || false,
       mensaje: datos.mensaje || 'Desde aqui puedes revisar administradores, profesores y estudiantes registrados.',
       error: datos.error || ''
     });
@@ -114,9 +123,12 @@ async function renderPanelUsuario(res, usuario, datos = {}) {
   if (usuario.rol === 'profesor') {
     const tareas = await Tarea.obtenerPorProfesorSemana(usuario.id, semana.inicio, semana.fin);
 
+        const clases = await Clase.obtenerPorProfesor(usuario.id);
     res.render('profesor-dashboard', {
       currentUser: usuario,
       tareas,
+      clases,
+      bienvenida: datos.bienvenida || false,
       mensaje: datos.mensaje || '',
       error: datos.error || '',
       valores: datos.valores || {
@@ -141,6 +153,7 @@ async function renderPanelUsuario(res, usuario, datos = {}) {
   res.render('estudiante-dashboard', {
     currentUser: usuario,
     tareas,
+    bienvenida: datos.bienvenida || false,
     mensaje: datos.mensaje || '',
     error: datos.error || '',
     semana
@@ -149,8 +162,225 @@ async function renderPanelUsuario(res, usuario, datos = {}) {
 
 async function mostrarLogin(req, res) {
   renderLogin(res, {
-    mensaje: req.query.registro === 'ok' ? 'Cuenta creada. Ya puedes iniciar sesion.' : ''
+    mensaje: req.query.registro === 'ok'
+      ? 'Cuenta creada. Ya puedes iniciar sesion.'
+      : req.query.password === 'actualizada'
+        ? 'Contrasena actualizada. Ya puedes iniciar sesion.'
+        : ''
   });
+}
+
+async function mostrarRecuperarContrasena(req, res) {
+  res.render('recuperar-contrasena', {
+    error: '',
+    mensaje: ''
+  });
+}
+
+
+async function mostrarVerificarRecuperacion(req, res) {
+  res.render('verificar-recuperacion', {
+    error: '',
+    mensaje: ''
+  });
+}
+async function verificarCodigoRecuperacion(req, res) {
+  const codigo = normalizarTexto(req.body.codigo);
+
+  if (!req.session.recuperacion) {
+    return res.render('verificar-recuperacion', {
+      error: 'La solicitud expiró. Solicita un código nuevo.',
+      mensaje: ''
+    });
+  }
+
+  if (!/^\d{6}$/.test(codigo)) {
+    return res.render('verificar-recuperacion', {
+      error: 'El código debe tener 6 dígitos.',
+      mensaje: ''
+    });
+  }
+
+  try {
+    const codigoHash = crypto
+      .createHash('sha256')
+      .update(codigo)
+      .digest('hex');
+
+    const registro = await Usuario.buscarCodigoRecuperacion(
+      req.session.recuperacion.usuarioId,
+      codigoHash
+    );
+
+    if (!registro) {
+      return res.render('verificar-recuperacion', {
+        error: 'El código es incorrecto o ya fue utilizado.',
+        mensaje: ''
+      });
+    }
+
+    if (Number(registro.vence_en) < Date.now()) {
+      return res.render('verificar-recuperacion', {
+        error: 'El código venció. Solicita uno nuevo.',
+        mensaje: ''
+      });
+    }
+
+    req.session.recuperacion.codigoId = registro.id;
+    req.session.recuperacion.verificado = true;
+
+    return res.redirect('/cambiar-contrasena');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).render('verificar-recuperacion', {
+      error: 'No fue posible verificar el código.',
+      mensaje: ''
+    });
+  }
+}
+
+async function mostrarCambiarContrasena(req, res) {
+  const recuperacion = req.session?.recuperacion;
+
+  if (!recuperacion?.verificado || !recuperacion?.codigoId) {
+    return res.redirect('/recuperar-contrasena');
+  }
+
+  return res.render('cambiar-contrasena', {
+    error: '',
+    mensaje: ''
+  });
+}
+
+async function cambiarContrasena(req, res) {
+  const contrasena = normalizarTexto(req.body.contrasena);
+  const confirmarContrasena = normalizarTexto(
+    req.body.confirmarContrasena
+  );
+  const recuperacion = req.session?.recuperacion;
+
+  if (!recuperacion?.verificado || !recuperacion?.codigoId) {
+    return res.redirect('/recuperar-contrasena');
+  }
+
+  if (contrasena.length < 8) {
+    return res.status(400).render('cambiar-contrasena', {
+      error: 'La contraseña debe tener al menos 8 caracteres.',
+      mensaje: ''
+    });
+  }
+
+  if (contrasena !== confirmarContrasena) {
+    return res.status(400).render('cambiar-contrasena', {
+      error: 'Las contraseñas no coinciden.',
+      mensaje: ''
+    });
+  }
+
+  try {
+    const passwordHash = Usuario.hashPassword(contrasena);
+
+    await Usuario.actualizarPassword(
+      recuperacion.usuarioId,
+      passwordHash
+    );
+
+    await Usuario.marcarCodigoRecuperacionUsado(
+      recuperacion.codigoId
+    );
+
+    req.session.destroy((error) => {
+      if (error) {
+        console.error('Error al cerrar la sesión:', error);
+      }
+
+      return res.redirect('/?password=actualizada');
+    });
+  } catch (error) {
+    console.error('Error al cambiar la contraseña:', error);
+
+    return res.status(500).render('cambiar-contrasena', {
+      error: 'No fue posible actualizar la contraseña. Inténtalo nuevamente.',
+      mensaje: ''
+    });
+  }
+}
+
+async function solicitarRecuperacion(req, res) {
+  const correo = normalizarCorreo(req.body.correo);
+
+  if (!correo) {
+    res.status(400).render('recuperar-contrasena', {
+      error: 'Debes ingresar tu correo electrónico.',
+      mensaje: ''
+    });
+    return;
+  }
+
+  try {
+    const usuario = await Usuario.buscarPorCorreo(correo);
+
+    if (!usuario) {
+      res.render('recuperar-contrasena', {
+        error: 'No encontramos una cuenta registrada con ese correo.',
+        mensaje: ''
+      });
+      return;
+    }
+
+    const codigo = crypto.randomInt(100000, 1000000);
+
+    // El código será válido durante 10 minutos
+    const venceEn = Date.now() + 10 * 60 * 1000;
+
+    // Guardamos una versión protegida del código
+    const codigoHash = crypto
+      .createHash('sha256')
+      .update(String(codigo))
+      .digest('hex');
+
+    await Usuario.guardarCodigoRecuperacion(
+  usuario.id,
+  codigoHash,
+  venceEn
+);
+
+await enviarCorreo({
+  para: correo,
+  asunto: 'Código de recuperación de contraseña - PLANUTOR',
+  texto: `Hola ${usuario.nombre},
+
+Recibimos una solicitud para recuperar la contraseña de tu cuenta de PLANUTOR.
+
+Tu código de recuperación es:
+
+${codigo}
+
+Este código es válido durante 10 minutos y solo puede utilizarse una vez.
+
+Si tú no solicitaste recuperar tu contraseña, puedes ignorar este mensaje.
+
+Equipo PLANUTOR`
+});
+
+console.log(`Código de recuperación enviado a ${correo}`);
+
+req.session.recuperacion = {
+  usuarioId: usuario.id,
+  correo: usuario.correo
+};
+
+res.redirect('/verificar-recuperacion');
+return;
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).render('recuperar-contrasena', {
+      error: 'No fue posible procesar la solicitud.',
+      mensaje: ''
+    });
+  }
 }
 
 async function iniciarSesion(req, res) {
@@ -169,10 +399,17 @@ async function iniciarSesion(req, res) {
       renderLogin(res.status(401), { error: 'Credenciales invalidas.' });
       return;
     }
+    if (!usuario.activo) {
+      renderLogin(res.status(403), { error: 'Esta cuenta está desactivada. Contacta al administrador.' });
+      return;
+    }
+        req.session.usuario = { id: usuario.id, rol: usuario.rol };
 
-    await renderPanelUsuario(res, usuario, {
-      mensaje: `Sesion iniciada como ${usuario.nombre}.`
-    });
+    if (req.body.recordar) {
+      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    }
+
+    await renderPanelUsuario(res, usuario, { bienvenida: true });
   } catch (error) {
     console.error(error);
     renderLogin(res.status(500), { error: 'No fue posible iniciar sesion.' });
@@ -193,12 +430,16 @@ async function mostrarPanel(req, res) {
       return;
     }
 
+           const mensajes = {
+      'tarea-creada': 'Tarea publicada en el muro semanal.',
+      'tarea-editada': 'Tarea actualizada.',
+      'tarea-eliminada': 'Tarea eliminada.',
+      'estado-actualizado': 'Estado de tarea actualizado.',
+      'clase-unida': 'Te uniste a la clase. Cuando el profesor publique tareas, las veras aqui.'
+    };
+
     await renderPanelUsuario(res, usuario, {
-      mensaje: req.query.mensaje === 'tarea-creada'
-        ? 'Tarea publicada en el muro semanal.'
-        : req.query.mensaje === 'estado-actualizado'
-          ? 'Estado de tarea actualizado.'
-          : ''
+      mensaje: mensajes[req.query.mensaje] || ''
     });
   } catch (error) {
     console.error(error);
@@ -382,8 +623,22 @@ async function registrarEstudiante(req, res) {
   }
 }
 
+function salir(req, res) {
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.redirect('/');
+  });
+}
+
 module.exports = {
+  salir,
   mostrarLogin,
+  mostrarRecuperarContrasena,
+  mostrarVerificarRecuperacion,
+  verificarCodigoRecuperacion,
+  solicitarRecuperacion,
+  mostrarCambiarContrasena,
+  cambiarContrasena,
   iniciarSesion,
   mostrarPanel,
   mostrarInicio,

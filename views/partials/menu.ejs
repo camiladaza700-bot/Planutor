@@ -1,0 +1,41 @@
+<nav class="menu-principal" aria-label="Navegación principal">
+  <% const rutaActual = typeof currentPath === 'string' ? currentPath : ''; %>
+  <% const claseActual = prefijo => rutaActual === prefijo || rutaActual.startsWith(prefijo + '/'); %>
+  <a class="menu-marca" href="<%= currentUser ? '/panel/' + currentUser.id : '/' %>">
+    <img src="/logo-planutor.svg" alt="">
+    <span>
+      <strong>PLANUTOR</strong>
+      <small>Organiza, aprende y avanza</small>
+    </span>
+  </a>
+
+  <div class="menu-enlaces">
+    <% if (currentUser) { %>
+      <a class="<%= claseActual('/panel') ? 'menu-activo' : '' %>" href="/panel/<%= currentUser.id %>">Mi panel <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% if (currentUser.rol === 'estudiante' || currentUser.rol === 'profesor') { %>
+        <a class="<%= claseActual('/tareas') ? 'menu-activo' : '' %>" href="/tareas/<%= currentUser.id %>">Tareas <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% } %>
+      <a class="<%= claseActual('/calendario') ? 'menu-activo' : '' %>" href="/calendario?usuarioId=<%= currentUser.id %>">Calendario <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% if (currentUser.rol === 'estudiante' || currentUser.rol === 'profesor') { %>
+        <a class="<%= claseActual('/recordatorios') ? 'menu-activo' : '' %>" href="/recordatorios/<%= currentUser.id %>">Recordatorios <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% } %>
+      <a class="<%= claseActual('/perfil') ? 'menu-activo' : '' %>" href="/perfil/<%= currentUser.id %>">Perfil <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <a class="<%= claseActual('/planeador') ? 'menu-activo' : '' %>" href="/planeador/<%= currentUser.id %>">Planeador <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% if (currentUser.rol === 'estudiante') { %>
+        <a class="<%= claseActual('/clases') ? 'menu-activo' : '' %>" href="/clases/estudiante/<%= currentUser.id %>">Clases <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% } %>
+      <% if (currentUser.rol === 'profesor') { %>
+        <a class="<%= claseActual('/clases') ? 'menu-activo' : '' %>" href="/clases/profesor/<%= currentUser.id %>">Mis clases <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% } %>
+      <% if (currentUser.rol !== 'administrador') { %>
+        <a class="<%= claseActual('/eventos-escolares') ? 'menu-activo' : '' %>" href="/eventos-escolares?usuarioId=<%= currentUser.id %>">Eventos <span class="estrella-actual" aria-hidden="true">★</span></a>
+      <% } %>
+      <a href="/salir" class="menu-salir" aria-label="Cerrar sesión" title="Cerrar sesión">
+        <img src="/icono-salir.svg" alt="">
+      </a>
+    <% } else { %>
+      <a href="/">Iniciar sesión</a>
+      <a href="/inicio">Registro</a>
+    <% } %>
+  </div>
+</nav>

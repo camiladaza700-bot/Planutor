@@ -1,6 +1,6 @@
 const express = require('express');
 const eventoController = require('../controllers/eventoController');
-const iaRoutes = require('./iaRoutes');
+
 
 const router = express.Router();
 

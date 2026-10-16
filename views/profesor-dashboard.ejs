@@ -4,58 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel del profesor - PLANUTOR</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f7ede2; color: #2d2d2d; padding: 24px; }
-    .contenedor { max-width: 1100px; margin: 0 auto; }
-    .hero, .panel, .lista { background: #fff; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
-    .hero { padding: 28px; margin-bottom: 24px; }
-    h1 { color: #f28482; margin-bottom: 8px; }
-    p { line-height: 1.5; }
-    .alerta { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-size: 14px; }
-    .ok { background: #e3f2ed; color: #2f665a; }
-    .error { background: #fde2e1; color: #8f2d2c; }
-    .grid { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 24px; align-items: start; }
-    .panel { padding: 24px; }
-    label { display:block; margin: 14px 0 6px; font-weight: bold; }
-    input, textarea { width:100%; padding:12px; border:1px solid #d5cec8; border-radius: 10px; font-size: 15px; }
-    textarea { min-height: 120px; resize: vertical; }
-    button { margin-top: 18px; width:100%; border:none; border-radius: 12px; background:#f28482; color:#fff; padding:15px; font-weight:bold; font-size:16px; cursor:pointer; }
-    .lista { padding: 24px; }
-    .cabecera-lista { display:flex; justify-content:space-between; gap:12px; margin-bottom:18px; align-items:center; }
-    .tareas { display:grid; gap:16px; }
-    .tarea { border:1px solid #f0ece7; border-radius: 16px; padding: 18px; }
-    .meta { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0; }
-    .chip { padding:6px 10px; border-radius:999px; font-size:13px; font-weight:bold; }
-    .materia { background:#fce7d6; color:#945f35; }
-    .fecha { background:#e3f2ed; color:#2f665a; }
-    .stats { display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
-    .stat { background:#f7ede2; border-radius:12px; padding:8px 10px; font-size:13px; }
-    .acciones { margin-top: 18px; display:flex; gap:12px; flex-wrap:wrap; }
-    .acciones a { text-decoration:none; padding:10px 14px; border-radius:10px; background:#84a59d; color:#fff; font-weight:bold; }
-    .vacio { color:#6b625b; }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
   <main class="contenedor">
     <section class="hero">
       <h1>Panel del profesor</h1>
+      <% if (bienvenida) { %>
+        <div class="welcome-banner" role="status">¡Bienvenido/a, <%= currentUser.nombre %>!</div>
+      <% } %>
       <p><strong><%= currentUser.nombre %></strong>, aqui publicas las tareas del curso que tienes asignado.</p>
       <p>Curso asignado: <strong>Grado <%= currentUser.grado || '-' %> - Grupo <%= currentUser.grupo || '-' %></strong>.</p>
       <p>Semana activa: <strong><%= semana.inicio %></strong> a <strong><%= semana.fin %></strong>.</p>
       <% if (mensaje) { %><div class="alerta ok"><%= mensaje %></div><% } %>
       <% if (error) { %><div class="alerta error"><%= error %></div><% } %>
-      <div class="acciones">
-        <a href="/panel/<%= currentUser.id %>">Recargar panel</a>
-        <a href="/calendario?personaje=profesor&usuarioId=<%= currentUser.id %>">Ver calendario</a>
-        <a href="/clases/profesor/<%= currentUser.id %>">
-  Mis clases
-</a>
-        <a href="/">Cerrar sesion</a>
-        <a href="/eventos-escolares?usuarioId=<%= currentUser.id %>">Eventos escolares</a>
-        
-      </div>
     </section>
 <section class="hero" id="recordatorios-box">
       <h2>Recordatorios</h2>
@@ -85,8 +48,16 @@
         <form action="/profesor/tareas" method="POST">
           <input type="hidden" name="profesorId" value="<%= currentUser.id %>">
 
-          <label for="materia">Materia</label>
-          <input id="materia" name="materia" value="<%= valores.materia %>" required>
+                    <label for="claseId">Clase</label>
+          <select id="claseId" name="claseId" required>
+            <option value="">Selecciona una clase</option>
+            <% clases.forEach((c) => { %>
+              <option value="<%= c.id %>"><%= c.nombre %> - Grado <%= c.grado %> (<%= c.codigo %>)</option>
+            <% }) %>
+          </select>
+
+          <label for="materia">Materia (opcional)</label>
+          <input id="materia" name="materia" value="<%= valores.materia %>">
 
           <label for="titulo">Titulo</label>
           <input id="titulo" name="titulo" value="<%= valores.titulo %>" required>
@@ -106,6 +77,7 @@
           <h2>Tareas publicadas esta semana</h2>
           <span><%= tareas.length %> tarea(s)</span>
         </div>
+        <p><a href="/tareas/<%= currentUser.id %>">Ver próximas, vencidas e historial de tareas</a></p>
         <% if (tareas.length === 0) { %>
           <p class="vacio">Todavia no has publicado tareas para esta semana.</p>
         <% } else { %>
@@ -124,6 +96,21 @@
                   <span class="stat">En proceso: <%= tarea.en_proceso || 0 %></span>
                   <span class="stat">Terminado: <%= tarea.terminados || 0 %></span>
                 </div>
+                                <details style="margin-top:12px;">
+                  <summary style="cursor:pointer;font-weight:bold;">Editar o eliminar</summary>
+
+                  <form action="/profesor/tareas/<%= tarea.id %>/editar" method="POST" style="margin-top:10px;">
+                    <input name="titulo" value="<%= tarea.titulo %>" required>
+                    <textarea name="descripcion" required><%= tarea.descripcion %></textarea>
+                    <input type="date" name="fechaEntrega" value="<%= tarea.fecha_entrega %>" required>
+                    <button type="submit">GUARDAR CAMBIOS</button>
+                  </form>
+
+                  <form action="/profesor/tareas/<%= tarea.id %>/eliminar" method="POST" style="margin-top:8px;" onsubmit="return confirm('¿Eliminar esta tarea?');">
+                    <button type="submit" style="background:#b42318;">ELIMINAR TAREA</button>
+                  </form>
+                </details>
+
               </article>
             <% }) %>
           </div>

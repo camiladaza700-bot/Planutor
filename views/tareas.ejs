@@ -1,33 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tareas pendientes</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tareas - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
-    <h1>Tareas - <%= personaje %></h1>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
+  <main class="contenedor">
+    <section class="hero">
+      <h1>Mis tareas</h1>
+      <p>Consulta tareas próximas, vencidas e historial sin limitarte a la semana actual.</p>
+      <% if (mensaje) { %><div class="alerta ok"><%= mensaje %></div><% } %>
+      <div class="acciones filtros-tareas" aria-label="Filtrar tareas">
+        <a class="filtro-tarea <%= filtro === 'proximas' ? 'activo' : '' %>" href="/tareas/<%= usuario.id %>?filtro=proximas" <%- filtro === 'proximas' ? 'aria-current="page"' : '' %>>Próximas</a>
+        <a class="filtro-tarea <%= filtro === 'vencidas' ? 'activo' : '' %>" href="/tareas/<%= usuario.id %>?filtro=vencidas" <%- filtro === 'vencidas' ? 'aria-current="page"' : '' %>>Vencidas</a>
+        <a class="filtro-tarea <%= filtro === 'historial' ? 'activo' : '' %>" href="/tareas/<%= usuario.id %>?filtro=historial" <%- filtro === 'historial' ? 'aria-current="page"' : '' %>>Historial</a>
+        <a class="filtro-tarea <%= filtro === 'todas' ? 'activo' : '' %>" href="/tareas/<%= usuario.id %>?filtro=todas" <%- filtro === 'todas' ? 'aria-current="page"' : '' %>>Todas</a>
+      </div>
+    </section>
 
-    <p>Lista de tareas pendientes y en proceso.</p>
+    <section class="muro">
+      <% if (tareas.length === 0) { %>
+        <p class="vacio">No hay tareas en esta categoría.</p>
+      <% } else { %>
+        <div class="lista">
+          <% tareas.forEach(tarea => { %>
+            <% const vencida = tarea.fecha_entrega < hoy && (usuario.rol !== 'estudiante' || tarea.estado !== 'terminado'); %>
+            <article class="tarea">
+              <h2><%= tarea.titulo %></h2>
+              <div class="meta">
+                <span class="chip materia"><%= tarea.materia %></span>
+                <span class="chip fecha">Entrega: <%= tarea.fecha_entrega %></span>
+                <% if (vencida) { %><span class="chip atrasada">Vencida</span><% } %>
+                <% if (usuario.rol === 'estudiante') { %>
+                  <span class="chip <%= tarea.estado.replace(' ', '-') %>"><%= tarea.estado %></span>
+                  <span class="chip profesor">Profesor: <%= tarea.profesor_nombre %></span>
+                <% } %>
+              </div>
+              <p><%= tarea.descripcion %></p>
 
-    <ul class="task-list">
-        <% if (tareas && tareas.length) { %>
-            <% tareas.forEach(function(t) { %>
--                <li><strong><%= t.titulo %></strong> — <%= t.fecha %> — <em><%= t.estado %></em></li>
-+                <li class="task-item">
-+                    <div class="task-left">
-+                        <strong><%= t.titulo %></strong>
-+                        <div class="task-meta"><%= t.fecha %></div>
-+                    </div>
-+                    <div class="task-right"><em><%= t.estado %></em></div>
-+                </li>
-            <% }) %>
-        <% } else { %>
-            <li>No hay tareas asignadas.</li>
-        <% } %>
-    </ul>
+              <% if (usuario.rol === 'estudiante') { %>
+                <form action="/estudiante/tareas/<%= tarea.id %>/estado" method="POST">
+                  <input type="hidden" name="estudianteId" value="<%= usuario.id %>">
+                  <input type="hidden" name="origen" value="tareas">
+                  <input type="hidden" name="filtro" value="<%= filtro %>">
+                  <label>Estado
+                    <select name="estado">
+                      <option value="pendiente" <%= tarea.estado === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
+                      <option value="en proceso" <%= tarea.estado === 'en proceso' ? 'selected' : '' %>>En proceso</option>
+                      <option value="terminado" <%= tarea.estado === 'terminado' ? 'selected' : '' %>>Terminado</option>
+                    </select>
+                  </label>
+                  <button type="submit">Guardar estado</button>
+                </form>
+              <% } else { %>
+                <p class="stats">Asignados: <%= tarea.estudiantes_asignados || 0 %> · Pendientes: <%= tarea.pendientes || 0 %> · En proceso: <%= tarea.en_proceso || 0 %> · Terminadas: <%= tarea.terminados || 0 %></p>
+                <details>
+                  <summary>Editar o eliminar</summary>
+                  <form action="/profesor/tareas/<%= tarea.id %>/editar" method="POST">
+                    <input type="hidden" name="origen" value="tareas">
+                    <input type="hidden" name="filtro" value="<%= filtro %>">
+                    <label>Título <input name="titulo" value="<%= tarea.titulo %>" required></label>
+                    <label>Descripción <textarea name="descripcion" required><%= tarea.descripcion %></textarea></label>
+                    <label>Entrega <input type="date" name="fechaEntrega" value="<%= tarea.fecha_entrega %>" required></label>
+                    <button type="submit">Guardar cambios</button>
+                  </form>
+                  <form action="/profesor/tareas/<%= tarea.id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta tarea?');">
+                    <input type="hidden" name="origen" value="tareas">
+                    <input type="hidden" name="filtro" value="<%= filtro %>">
+                    <button type="submit" class="borrar">Eliminar tarea</button>
+                  </form>
+                </details>
+              <% } %>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
 
-    <p><a href="/">Volver al inicio</a></p>
+    <a class="volver" href="/panel/<%= usuario.id %>">← Volver al panel</a>
+  </main>
 </body>
 </html>

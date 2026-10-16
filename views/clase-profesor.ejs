@@ -5,95 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title><%= clase.nombre %> - PLANUTOR</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7ede2;
-      min-height: 100vh;
-      padding: 30px;
-    }
-
-    .contenedor {
-      max-width: 1000px;
-      margin: auto;
-    }
-
-    .encabezado {
-      background: white;
-      padding: 30px;
-      border-radius: 18px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    h1 {
-      color: #f28482;
-      margin-bottom: 10px;
-    }
-
-    .informacion {
-      color: #555;
-      margin-top: 8px;
-    }
-
-    .codigo {
-      display: inline-block;
-      margin-top: 18px;
-      padding: 12px 20px;
-      background-color: #f7ede2;
-      border-radius: 8px;
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    .seccion {
-      background: white;
-      padding: 25px;
-      border-radius: 18px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .seccion h2 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    .estudiante {
-      padding: 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .estudiante:last-child {
-      border-bottom: none;
-    }
-
-    .estudiante strong {
-      color: #333;
-    }
-
-    .sin-estudiantes {
-      color: #777;
-    }
-
-    .volver {
-      display: inline-block;
-      color: #333;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
 
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
 
   <div class="contenedor">
 
@@ -115,6 +31,22 @@
 
     </section>
 
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+      <div class="alerta ok"><%= mensaje %></div>
+    <% } %>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alerta error"><%= error %></div>
+    <% } %>
+
+    <section class="seccion">
+      <h2>Editar clase</h2>
+      <form action="/clases/profesor/<%= profesor.id %>/<%= clase.id %>/editar" method="POST">
+        <label>Nombre <input type="text" name="nombre" value="<%= clase.nombre %>" required></label>
+        <label>Grado <input type="text" name="grado" value="<%= clase.grado %>" required></label>
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </section>
+
 
     <section class="seccion">
 
@@ -133,6 +65,9 @@
           <div class="estudiante">
             <strong><%= estudiante.nombre %></strong>
             <p><%= estudiante.correo %></p>
+            <form action="/clases/profesor/<%= profesor.id %>/<%= clase.id %>/estudiantes/<%= estudiante.id %>/retirar" method="POST" onsubmit="return confirm('¿Retirar a este estudiante de la clase?');">
+              <button type="submit" class="borrar">Retirar estudiante</button>
+            </form>
           </div>
 
         <% }) %>

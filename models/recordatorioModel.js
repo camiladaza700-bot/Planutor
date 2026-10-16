@@ -1,4 +1,4 @@
-const { all } = require('../config/db');
+const { all, get, run } = require('../config/db');
 
 function obtenerRangoRecordatorio(dias = 3) {
   const hoy = new Date();
@@ -14,6 +14,45 @@ function obtenerRangoRecordatorio(dias = 3) {
 
 const Recordatorio = {
   obtenerRangoRecordatorio,
+
+  async obtenerPreferencia(usuarioId) {
+    const preferencia = await get(
+      `SELECT correo_activo, dias_anticipacion FROM preferencias_recordatorios WHERE usuario_id = ?`,
+      [usuarioId]
+    );
+
+    return preferencia || { correo_activo: 1, dias_anticipacion: 3 };
+  },
+
+  guardarPreferencia({ usuarioId, correoActivo, diasAnticipacion }) {
+    return run(
+      `
+        INSERT INTO preferencias_recordatorios
+          (usuario_id, correo_activo, dias_anticipacion, actualizado_en)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(usuario_id) DO UPDATE SET
+          correo_activo = excluded.correo_activo,
+          dias_anticipacion = excluded.dias_anticipacion,
+          actualizado_en = CURRENT_TIMESTAMP
+      `,
+      [usuarioId, correoActivo ? 1 : 0, diasAnticipacion]
+    );
+  },
+
+  fueEnviadoHoy(usuarioId, tareaId, fechaEnvio) {
+    return get(
+      `SELECT id FROM envios_recordatorios WHERE usuario_id = ? AND tarea_id = ? AND fecha_envio = ?`,
+      [usuarioId, tareaId, fechaEnvio]
+    );
+  },
+
+  registrarEnvio(usuarioId, tareaId, fechaEnvio) {
+    return run(
+      `INSERT OR IGNORE INTO envios_recordatorios (usuario_id, tarea_id, fecha_envio)
+       VALUES (?, ?, ?)`,
+      [usuarioId, tareaId, fechaEnvio]
+    );
+  },
 
   obtenerParaProfesor(profesorId, dias = 3) {
     const { desde, hasta } = obtenerRangoRecordatorio(dias);

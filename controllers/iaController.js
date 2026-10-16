@@ -1,11 +1,12 @@
 // Controlador del Asistente IA (Google Gemini)
 // Usa fetch nativo de Node 18+ contra la API REST de Gemini.
 // No depende del SDK @google/generative-ai.
+const IA = require('../models/iaModel');
+const Usuario = require('../models/usuarioModel');
 
 const MODELOS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-flash-latest'
+  'gemini-3.8-flash',
+  'gemini-3-flash-preview'
 ];
 
 const API_BASE =
@@ -19,15 +20,34 @@ const INSTRUCCIONES =
   'responde igual pero de manera corta y apropiada para un colegio. ' +
   'No uses formato markdown con asteriscos, escribe texto plano.';
 
+const LIMITE_DIARIO = Number(process.env.IA_LIMITE_DIARIO || 20);
+
+function fechaHoy() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function contextoUsuario(usuario) {
+  const datos = [
+    `Nombre: ${usuario.nombre}.`,
+    `Rol: ${usuario.rol}.`,
+    usuario.institucion ? `Institución: ${usuario.institucion}.` : '',
+    usuario.rol === 'estudiante'
+      ? `Nivel: ${usuario.nivel || 'sin especificar'}, grado: ${usuario.grado || 'sin especificar'}, grupo: ${usuario.grupo || 'sin especificar'}.`
+      : ''
+  ].filter(Boolean).join(' ');
+
+  return ` Contexto de la persona a quien ayudas: ${datos}`;
+}
+
 function revisarClave() {
   const clave = (process.env.GEMINI_API_KEY || '').trim();
 
-  if (!clave) {
+  if (!clave || clave === 'tu_clave') {
     return {
       ok: false,
       mensaje:
-        'No se encontro GEMINI_API_KEY. Crea el archivo .env dentro de ' +
-        'la carpeta sistema-academico con la linea GEMINI_API_KEY=tu_clave'
+        'Configura GEMINI_API_KEY en el archivo .env de la carpeta Planutor ' +
+        'con tu clave real de Google AI Studio.'
     };
   }
 
@@ -39,14 +59,18 @@ function revisarClave() {
   };
 }
 
-async function llamarGemini(clave, modelo, pregunta) {
+async function llamarGemini(clave, modelo, pregunta, usuario, historial) {
   const url = `${API_BASE}/${modelo}:generateContent?key=${clave}`;
 
   const cuerpo = {
     systemInstruction: {
-      parts: [{ text: INSTRUCCIONES }]
+      parts: [{ text: INSTRUCCIONES + contextoUsuario(usuario) }]
     },
     contents: [
+      ...historial.map(mensaje => ({
+        role: mensaje.rol === 'asistente' ? 'model' : 'user',
+        parts: [{ text: mensaje.contenido }]
+      })),
       {
         role: 'user',
         parts: [{ text: pregunta }]
@@ -121,6 +145,30 @@ async function responderPregunta(req, res) {
       });
     }
 
+    const usuario = await Usuario.buscarPorId(req.session.usuario.id);
+    if (!usuario) {
+      return res.status(401).json({ error: 'La sesión no es válida.' });
+    }
+
+    const fecha = fechaHoy();
+    const uso = await IA.usosHoy(usuario.id, fecha);
+    if (Number(uso?.solicitudes || 0) >= LIMITE_DIARIO) {
+      return res.status(429).json({
+        error: `Alcanzaste el límite diario de ${LIMITE_DIARIO} consultas. Intenta de nuevo mañana.`,
+        limiteAlcanzado: true
+      });
+    }
+
+    let conversacionId = Number(req.body.conversacionId) || null;
+    let historial = [];
+    if (conversacionId) {
+      const conversacion = await IA.buscarConversacion(conversacionId, usuario.id);
+      if (!conversacion) {
+        return res.status(403).json({ error: 'No tienes acceso a esta conversación.' });
+      }
+      historial = await IA.obtenerMensajes(conversacionId);
+    }
+
     const revision = revisarClave();
 
     if (!revision.ok) {
@@ -143,7 +191,9 @@ async function responderPregunta(req, res) {
         salida = await llamarGemini(
           revision.clave,
           modelo,
-          pregunta
+          pregunta,
+          usuario,
+          historial
         );
       } catch (e) {
         if (e.name === 'AbortError') {
@@ -170,9 +220,22 @@ async function responderPregunta(req, res) {
         const texto = extraerTexto(datos);
 
         if (texto) {
+          if (!conversacionId) {
+            const creada = await IA.crearConversacion(
+              usuario.id,
+              pregunta.slice(0, 80)
+            );
+            conversacionId = creada.id;
+          }
+
+          await IA.guardarIntercambio(conversacionId, pregunta, texto);
+          await IA.registrarUso(usuario.id, fecha);
+
           return res.json({
             respuesta: texto,
-            modelo
+            modelo,
+            conversacionId,
+            restantes: Math.max(0, LIMITE_DIARIO - Number(uso?.solicitudes || 0) - 1)
           });
         }
 
@@ -272,6 +335,48 @@ async function responderPregunta(req, res) {
   }
 }
 
+async function listarConversaciones(req, res) {
+  try {
+    const conversaciones = await IA.obtenerConversaciones(req.session.usuario.id);
+    const uso = await IA.usosHoy(req.session.usuario.id, fechaHoy());
+    return res.json({
+      conversaciones,
+      restantes: Math.max(0, LIMITE_DIARIO - Number(uso?.solicitudes || 0)),
+      limite: LIMITE_DIARIO
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'No fue posible cargar las conversaciones.' });
+  }
+}
+
+async function obtenerConversacion(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const conversacion = await IA.buscarConversacion(id, req.session.usuario.id);
+    if (!conversacion) return res.status(404).json({ error: 'Conversación no encontrada.' });
+    const mensajes = await IA.obtenerMensajes(id, 100);
+    return res.json({ conversacion, mensajes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'No fue posible cargar la conversación.' });
+  }
+}
+
+async function eliminarConversacion(req, res) {
+  try {
+    const resultado = await IA.eliminarConversacion(
+      Number(req.params.id),
+      req.session.usuario.id
+    );
+    if (!resultado.changes) return res.status(404).json({ error: 'Conversación no encontrada.' });
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'No fue posible eliminar la conversación.' });
+  }
+}
+
 // Ruta de diagnostico: GET /ia/estado
 async function estado(req, res) {
   const revision = revisarClave();
@@ -324,5 +429,8 @@ async function estado(req, res) {
 
 module.exports = {
   responderPregunta,
-  estado
+  estado,
+  listarConversaciones,
+  obtenerConversacion,
+  eliminarConversacion
 };

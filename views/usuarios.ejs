@@ -4,91 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuarios registrados - PLANUTOR</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7ede2;
-      color: #2d2d2d;
-      padding: 24px;
-    }
-    .contenedor {
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .encabezado {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-      margin-bottom: 24px;
-    }
-    h1 { color: #84a59d; margin-bottom: 8px; }
-    p { line-height: 1.5; }
-    .alerta {
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-    }
-    .alerta.error {
-      background: #fde2e1;
-      color: #8f2d2c;
-    }
-    .alerta.ok {
-      background: #e3f2ed;
-      color: #2f665a;
-    }
-    .tabla {
-      width: 100%;
-      border-collapse: collapse;
-      background: #ffffff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-    th, td {
-      padding: 14px 16px;
-      text-align: left;
-      border-bottom: 1px solid #f0ece7;
-    }
-    th {
-      background: #84a59d;
-      color: white;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .vacio {
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-    .acciones {
-      margin-top: 18px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .acciones a {
-      text-decoration: none;
-      padding: 10px 14px;
-      border-radius: 10px;
-      background: #f28482;
-      color: #fff;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
   <main class="contenedor">
     <section class="encabezado">
       <h1>Usuarios registrados</h1>
-      <p>Panel administrativo para revisar los usuarios registrados y sus cursos asignados.</p>
+      <p>Gestiona usuarios, accesos, roles e instituciones de PLANUTOR.</p>
 
       <% if (currentUser) { %>
         <p><strong>Usuario actual:</strong> <%= currentUser.nombre %> (<%= currentUser.rol %>)</p>
+      <% } %>
+
+      <% if (bienvenida) { %>
+        <div class="welcome-banner" role="status">¡Bienvenido/a, <%= currentUser.nombre %>!</div>
       <% } %>
 
       <% if (mensaje) { %>
@@ -123,7 +53,10 @@
             <th>Nivel</th>
             <th>Grado</th>
             <th>Grupo</th>
+            <th>Institución</th>
+            <th>Estado</th>
             <th>Creado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -135,12 +68,76 @@
               <td><%= usuario.nivel || '-' %></td>
               <td><%= usuario.grado || '-' %></td>
               <td><%= usuario.grupo || '-' %></td>
+              <td><%= usuario.institucion || '-' %></td>
+              <td><%= usuario.activo ? 'Activa' : 'Desactivada' %></td>
               <td><%= usuario.creado_en %></td>
+              <td>
+                <details>
+                  <summary>Gestionar</summary>
+                  <form action="/usuarios/<%= usuario.id %>/editar" method="POST">
+                    <label>Nombre <input name="nombre" value="<%= usuario.nombre %>" required></label>
+                    <label>Correo <input type="email" name="correo" value="<%= usuario.correo %>" required></label>
+                    <label>Rol
+                      <select name="rol" <%= currentUser && currentUser.id === usuario.id ? 'disabled' : '' %>>
+                        <% ['estudiante', 'profesor', 'administrador'].forEach(rol => { %>
+                          <option value="<%= rol %>" <%= usuario.rol === rol ? 'selected' : '' %>><%= rol %></option>
+                        <% }) %>
+                      </select>
+                      <% if (currentUser && currentUser.id === usuario.id) { %><input type="hidden" name="rol" value="administrador"><% } %>
+                    </label>
+                    <label>Institución <input name="institucion" value="<%= usuario.institucion || '' %>"></label>
+                    <label>Nivel <input name="nivel" value="<%= usuario.nivel || '' %>"></label>
+                    <label>Grado <input name="grado" value="<%= usuario.grado || '' %>"></label>
+                    <label>Grupo <input name="grupo" value="<%= usuario.grupo || '' %>"></label>
+                    <button type="submit">Guardar usuario</button>
+                  </form>
+
+                  <% if (!currentUser || currentUser.id !== usuario.id) { %>
+                    <form action="/usuarios/<%= usuario.id %>/estado" method="POST">
+                      <button type="submit"><%= usuario.activo ? 'Desactivar cuenta' : 'Activar cuenta' %></button>
+                    </form>
+                    <form action="/usuarios/<%= usuario.id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta cuenta y sus datos relacionados? Esta acción no se puede deshacer.');">
+                      <button type="submit" class="borrar">Eliminar cuenta</button>
+                    </form>
+                  <% } else { %>
+                    <p>No puedes desactivar ni eliminar tu propia cuenta.</p>
+                  <% } %>
+                </details>
+              </td>
             </tr>
           <% }) %>
         </tbody>
       </table>
     <% } %>
+
+    <section class="seccion">
+      <h2>Instituciones</h2>
+      <form action="/instituciones" method="POST">
+        <label>Nueva institución <input name="nombre" required></label>
+        <button type="submit">Agregar institución</button>
+      </form>
+
+      <% if (instituciones.length === 0) { %>
+        <p class="vacio">No hay instituciones creadas todavía.</p>
+      <% } else { %>
+        <div class="lista">
+          <% instituciones.forEach(institucion => { %>
+            <article class="tarea">
+              <form action="/instituciones/<%= institucion.id %>/editar" method="POST">
+                <label>Nombre <input name="nombre" value="<%= institucion.nombre %>" required></label>
+                <button type="submit">Guardar</button>
+              </form>
+              <p>Usuarios asignados: <%= institucion.usuarios_asignados %></p>
+              <% if (Number(institucion.usuarios_asignados) === 0) { %>
+                <form action="/instituciones/<%= institucion.id %>/eliminar" method="POST" onsubmit="return confirm('¿Eliminar esta institución?');">
+                  <button type="submit" class="borrar">Eliminar institución</button>
+                </form>
+              <% } %>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
   </main>
 </body>
 </html>

@@ -1,716 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Mi Planeador - PLANUTOR</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f7ede2;
-            color: #3d4a47;
-        }
-
-        header {
-            background: #84a59d;
-            color: white;
-            padding: 22px 35px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        header p {
-            margin: 5px 0 0;
-        }
-
-        .volver {
-            color: white;
-            text-decoration: none;
-            background: rgba(255,255,255,0.18);
-            padding: 10px 16px;
-            border-radius: 10px;
-        }
-
-        .contenedor {
-            width: 92%;
-            max-width: 1100px;
-            margin: 30px auto;
-        }
-
-        .bienvenida {
-            background: white;
-            padding: 25px;
-            border-radius: 18px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
-        }
-
-        .bienvenida h2 {
-            margin-top: 0;
-            color: #84a59d;
-        }
-
-        .acciones {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        button,
-        .boton {
-            border: none;
-            cursor: pointer;
-            padding: 11px 17px;
-            border-radius: 10px;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .nuevo {
-            background: #f28482;
-            color: white;
-        }
-
-        .filtro {
-            background: white;
-            color: #3d4a47;
-            border: 1px solid #ddd;
-        }
-
-        .filtro.activo {
-            background: #84a59d;
-            color: white;
-        }
-
-        .formulario {
-            background: white;
-            padding: 25px;
-            border-radius: 18px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
-        }
-
-        .formulario h2 {
-            color: #84a59d;
-            margin-top: 0;
-        }
-
-        .campo {
-            margin-bottom: 16px;
-        }
-
-        .campo label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        .campo input,
-        .campo textarea,
-        .campo select {
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #ddd;
-            border-radius: 9px;
-            font-size: 15px;
-        }
-
-        .campo textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .guardar {
-            background: #84a59d;
-            color: white;
-        }
-
-        .cancelar {
-            background: #eee;
-            color: #444;
-        }
-
-        .lista {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .anotacion {
-            background: white;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.07);
-            border-left: 7px solid #84a59d;
-        }
-
-        .anotacion.atrasada {
-            border-left-color: #f28482;
-        }
-
-        .anotacion.completada {
-            border-left-color: #84a59d;
-        }
-
-        .anotacion.archivada {
-            border-left-color: #aaa;
-            opacity: 0.75;
-        }
-
-        .anotacion h3 {
-            margin: 0 0 8px;
-            font-size: 20px;
-        }
-
-        .fecha {
-            color: #777;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .descripcion {
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-
-        .etiquetas {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .etiqueta {
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            background: #f7ede2;
-        }
-
-        .pendiente {
-            background: #fff3b0;
-        }
-
-        .en-proceso {
-            background: #dceeff;
-        }
-
-        .completada {
-            background: #dff3e4;
-        }
-
-        .atrasada {
-            background: #ffdede;
-        }
-
-        .archivada {
-            background: #eeeeee;
-        }
-
-        .botones {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .editar {
-            background: #f6bd60;
-            color: white;
-        }
-
-        .archivar {
-            background: #84a59d;
-            color: white;
-        }
-
-        .eliminar {
-            background: #f28482;
-            color: white;
-        }
-
-        .vacio {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 18px;
-            color: #777;
-        }
-
-        .oculto {
-            display: none;
-        }
-
-        @media (max-width: 650px) {
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .contenedor {
-                width: 94%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi planeador - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
+  <% const activas = anotaciones.filter(anotacion => anotacion.estado !== 'archivada'); %>
+  <% const pendientes = anotaciones.filter(anotacion => ['pendiente', 'en_proceso', 'atrasada'].includes(anotacion.estado)).length; %>
+  <main class="contenedor planeador-contenedor">
+    <section class="hero planeador-hero">
+      <div>
+        <p class="sobrelinea">MI ORGANIZACIÓN</p>
+        <h1>Hola, <%= usuario.nombre.split(' ')[0] %></h1>
+        <p>Reúne tus apuntes, tareas y recordatorios en un solo lugar.</p>
+      </div>
+      <div class="planeador-acciones-principales">
+        <button class="boton" type="button" onclick="mostrarFormularioNuevo()">+ Nueva anotación</button>
+        <a href="/calendario?usuarioId=<%= usuarioId %>">Ver calendario</a>
+      </div>
+    </section>
 
-<body>
+    <section class="planeador-resumen" aria-label="Resumen del planeador">
+      <article class="stat"><span class="stat-etiqueta">Anotaciones activas</span><strong><%= activas.length %></strong></article>
+      <article class="stat"><span class="stat-etiqueta">Por completar</span><strong><%= pendientes %></strong></article>
+      <article class="stat"><span class="stat-etiqueta">Tareas esta semana</span><strong><%= tareas.length %></strong></article>
+    </section>
 
-<header>
+    <section id="formulario" class="formulario oculto planeador-formulario">
+      <div class="encabezado-seccion">
+        <div><p class="sobrelinea">ORGANIZA TU TIEMPO</p><h2 id="tituloFormulario">Nueva anotación</h2></div>
+        <button class="boton-secundario" type="button" onclick="ocultarFormulario()">Cerrar</button>
+      </div>
+      <form id="formularioAnotacion" method="POST" action="/planeador/<%= usuarioId %>/crear" class="formulario-planeador-campos">
+        <div class="campo campo-amplio"><label for="campoTitulo">Título</label><input type="text" id="campoTitulo" name="titulo" placeholder="Ej.: Preparar exposición de ciencias" required></div>
+        <div class="campo campo-amplio"><label for="campoDescripcion">Descripción <span>(opcional)</span></label><textarea id="campoDescripcion" name="descripcion" placeholder="Agrega detalles que te ayuden a recordar."></textarea></div>
+        <div class="campo"><label for="campoFecha">Fecha</label><input type="date" id="campoFecha" name="fecha" required></div>
+        <div class="campo"><label for="campoCategoria">Categoría</label><select id="campoCategoria" name="categoria"><option value="Estudio">Estudio</option><option value="Tarea">Tarea</option><option value="Examen">Examen</option><option value="Proyecto">Proyecto</option><option value="Personal">Personal</option><option value="General">General</option></select></div>
+        <div class="campo"><label for="campoEstado">Estado</label><select id="campoEstado" name="estado"><option value="pendiente">Pendiente</option><option value="en_proceso">En proceso</option><option value="completada">Completada</option></select></div>
+        <div class="botones campo-amplio"><button id="botonGuardar" type="submit">Guardar anotación</button><button class="boton-secundario" type="button" onclick="ocultarFormulario()">Cancelar</button></div>
+      </form>
+    </section>
 
-    <div>
-        <h1> Mi Planeador</h1>
-        <p>Organiza tus cosas del colegio</p>
-    </div>
-
-    <a class="volver" href="/panel/<%= usuarioId %>">
-        ← Volver
-    </a>
-
-</header>
-
-
-<main class="contenedor">
-
-    <section class="bienvenida">
-
-        <h2> Tu espacio personal</h2>
-
-        <p>
-            Aquí puedes guardar tus propias anotaciones,
-            pendientes, ideas y recordatorios del colegio.
-        </p>
-
-        <div class="acciones">
-
-            <button
-                class="boton nuevo"
-                onclick="mostrarFormularioNuevo()">
-                 Nueva anotación
-            </button>
-
-            <button
-                class="boton filtro activo"
-                onclick="filtrar('todas', this)">
-                Todas
-            </button>
-
-            <button
-                class="boton filtro"
-                onclick="filtrar('pendiente', this)">
-                 Pendientes
-            </button>
-
-            <button
-                class="boton filtro"
-                onclick="filtrar('en_proceso', this)">
-                 En proceso
-            </button>
-
-            <button
-                class="boton filtro"
-                onclick="filtrar('completada', this)">
-                 Completadas
-            </button>
-
-            <button
-                class="boton filtro"
-                onclick="filtrar('atrasada', this)">
-                 Atrasadas
-            </button>
-
-            <button
-                class="boton filtro"
-                onclick="filtrar('archivada', this)">
-                 Archivadas
-            </button>
-
+    <div class="planeador-grid">
+      <section class="seccion planeador-notas">
+        <div class="encabezado-seccion">
+          <div><p class="sobrelinea">NOTAS PERSONALES</p><h2>Mis anotaciones</h2></div>
+          <span class="contador-notas"><%= anotaciones.length %> en total</span>
         </div>
-
-    </section>
-
-
-    <!-- FORMULARIO -->
-
-    <section
-        id="formulario"
-        class="formulario oculto">
-
-        <h2 id="tituloFormulario"> Nueva anotación</h2>
-
-        <form
-            id="formularioAnotacion"
-            method="POST"
-            action="/planeador/<%= usuarioId %>/crear">
-
-            <div class="campo">
-
-                <label>Título</label>
-
-                <input
-                    type="text"
-                    id="campoTitulo"
-                    name="titulo"
-                    placeholder="Ej: Estudiar para química"
-                    required>
-
-            </div>
-
-
-            <div class="campo">
-
-                <label>Descripción</label>
-
-                <textarea
-                    id="campoDescripcion"
-                    name="descripcion"
-                    placeholder="Escribe los detalles de tu anotación..."></textarea>
-
-            </div>
-
-
-            <div class="campo">
-
-                <label>Fecha</label>
-
-                <input
-                    type="date"
-                    id="campoFecha"
-                    name="fecha"
-                    required>
-
-            </div>
-
-
-            <div class="campo">
-
-                <label>Categoría</label>
-
-                <select id="campoCategoria" name="categoria">
-
-                    <option value="Estudio"> Estudio</option>
-
-                    <option value="Tarea"> Tarea</option>
-
-                    <option value="Examen"> Examen</option>
-
-                    <option value="Proyecto"> Proyecto</option>
-
-                    <option value="Personal"> Personal</option>
-
-                    <option value="General"> General</option>
-
-                </select>
-
-            </div>
-
-
-            <div class="campo">
-
-                <label>Estado</label>
-
-                <select id="campoEstado" name="estado">
-
-                    <option value="pendiente">
-                         Pendiente
-                    </option>
-
-                    <option value="en_proceso">
-                         En proceso
-                    </option>
-
-                    <option value="completada">
-                         Completada
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <button id="botonGuardar" class="boton guardar" type="submit">
-                 Guardar anotación
-            </button>
-
-            <button
-                class="boton cancelar"
-                type="button"
-                onclick="ocultarFormulario()">
-                Cancelar
-            </button>
-
-        </form>
-
-    </section>
-
-
-    
-
-    <section class="lista">
-
-        <% if (anotaciones.length === 0) { %>
-
-            <div class="vacio">
-
-                <h2> Todavía no tienes anotaciones</h2>
-
-                <p>
-                    Crea tu primera anotación para comenzar a organizarte.
-                </p>
-
-            </div>
-
-        <% } %>
-
-
-        <% anotaciones.forEach(anotacion => { %>
-
-            <article
-                class="anotacion"
-                data-estado="<%= anotacion.estado %>">
-
-                <h3>
-                    <%= anotacion.titulo %>
-                </h3>
-
-                <div class="fecha">
-                     <%= anotacion.fecha %>
+        <div class="filtros-planeador" aria-label="Filtrar anotaciones">
+          <button class="filtro activo" type="button" onclick="filtrar('todas', this)">Todas</button><button class="filtro" type="button" onclick="filtrar('pendiente', this)">Pendientes</button><button class="filtro" type="button" onclick="filtrar('en_proceso', this)">En proceso</button><button class="filtro" type="button" onclick="filtrar('completada', this)">Completadas</button><button class="filtro" type="button" onclick="filtrar('atrasada', this)">Atrasadas</button><button class="filtro" type="button" onclick="filtrar('archivada', this)">Archivadas</button>
+        </div>
+        <div id="sinResultadosPlaneador" class="vacio oculto">No hay anotaciones en esta categoría.</div>
+        <div class="lista lista-anotaciones-planeador">
+          <% if (anotaciones.length === 0) { %>
+            <div class="vacio"><h3>Tu planeador está listo</h3><p>Crea una anotación para organizar lo que sigue.</p><button type="button" onclick="mostrarFormularioNuevo()">Crear mi primera anotación</button></div>
+          <% } %>
+          <% anotaciones.forEach(anotacion => { %>
+            <% const estadoTexto = { pendiente: 'Pendiente', en_proceso: 'En proceso', completada: 'Completada', atrasada: 'Atrasada', archivada: 'Archivada' }[anotacion.estado] || anotacion.estado; %>
+            <article class="anotacion anotacion-planeador" data-estado="<%= anotacion.estado %>">
+              <div class="anotacion-contenido">
+                <div class="anotacion-superior"><span class="etiqueta"><%= anotacion.categoria %></span><span class="fecha"><%= anotacion.fecha %></span></div>
+                <h3><%= anotacion.titulo %></h3>
+                <% if (anotacion.descripcion) { %><p class="descripcion"><%= anotacion.descripcion %></p><% } %>
+                <span class="chip <%= anotacion.estado === 'en_proceso' ? 'en-proceso' : anotacion.estado %>"><%= estadoTexto %></span>
+              </div>
+              <details class="acciones-anotacion">
+                <summary aria-label="Acciones para <%= anotacion.titulo %>">•••</summary>
+                <div>
+                  <button class="enlace-accion" type="button" data-id="<%= anotacion.id %>" data-titulo="<%= anotacion.titulo %>" data-descripcion="<%= anotacion.descripcion %>" data-fecha="<%= anotacion.fecha %>" data-categoria="<%= anotacion.categoria %>" data-estado="<%= anotacion.estadoReal %>" onclick="editarAnotacion(this)">Editar</button>
+                  <% if (anotacion.estado === 'archivada') { %><form method="POST" action="/planeador/<%= usuarioId %>/desarchivar/<%= anotacion.id %>"><button class="enlace-accion" type="submit">Desarchivar</button></form><% } else { %><form method="POST" action="/planeador/<%= usuarioId %>/archivar/<%= anotacion.id %>"><button class="enlace-accion" type="submit">Archivar</button></form><% } %>
+                  <form method="POST" action="/planeador/<%= usuarioId %>/eliminar/<%= anotacion.id %>" onsubmit="return confirm('¿Eliminar esta anotación? Esta acción no se puede deshacer.');"><button class="enlace-accion peligro" type="submit">Eliminar</button></form>
                 </div>
-
-                <div class="descripcion">
-                    <%= anotacion.descripcion %>
-                </div>
-
-
-                <div class="etiquetas">
-
-                    <span class="etiqueta">
-                         <%= anotacion.categoria %>
-                    </span>
-
-
-                    <% if (anotacion.estado === 'pendiente') { %>
-
-                        <span class="etiqueta pendiente">
-                             Pendiente
-                        </span>
-
-                    <% } else if (anotacion.estado === 'en_proceso') { %>
-
-                        <span class="etiqueta en-proceso">
-                             En proceso
-                        </span>
-
-                    <% } else if (anotacion.estado === 'completada') { %>
-
-                        <span class="etiqueta completada">
-                             Completada
-                        </span>
-
-                    <% } else if (anotacion.estado === 'atrasada') { %>
-
-                        <span class="etiqueta atrasada">
-                             Atrasada
-                        </span>
-
-                    <% } else if (anotacion.estado === 'archivada') { %>
-
-                        <span class="etiqueta archivada">
-                             Archivada
-                        </span>
-
-                    <% } %>
-
-                </div>
-
-
-                <div class="botones">
-
-                    <button
-                        class="boton editar"
-                        type="button"
-                        data-id="<%= anotacion.id %>"
-                        data-titulo="<%= anotacion.titulo %>"
-                        data-descripcion="<%= anotacion.descripcion %>"
-                        data-fecha="<%= anotacion.fecha %>"
-                        data-categoria="<%= anotacion.categoria %>"
-                        data-estado="<%= anotacion.estadoReal %>"
-                        onclick="editarAnotacion(this)">
-                         Editar
-                    </button>
-
-
-                    <% if (anotacion.estado === 'archivada') { %>
-
-                        <form
-                            method="POST"
-                            action="/planeador/<%= usuarioId %>/desarchivar/<%= anotacion.id %>">
-
-                            <button
-                                class="boton archivar"
-                                type="submit">
-                                 Desarchivar
-                            </button>
-
-                        </form>
-
-                    <% } else { %>
-
-                        <form
-                            method="POST"
-                            action="/planeador/<%= usuarioId %>/archivar/<%= anotacion.id %>">
-
-                            <button
-                                class="boton archivar"
-                                type="submit">
-                                 Archivar
-                            </button>
-
-                        </form>
-
-                    <% } %>
-
-
-                    <form
-                        method="POST"
-                        action="/planeador/<%= usuarioId %>/eliminar/<%= anotacion.id %>"
-                        onsubmit="return confirm('¿Seguro que quieres eliminar esta anotación? Esta acción no se puede deshacer.');">
-
-                        <button
-                            class="boton eliminar"
-                            type="submit">
-                             Eliminar
-                        </button>
-
-                    </form>
-
-                </div>
-
+              </details>
             </article>
+          <% }) %>
+        </div>
+      </section>
 
-        <% }); %>
-
-    </section>
-
-</main>
-
-
-<script>
-
-function mostrarFormulario() {
-
-    document
-        .getElementById('formulario')
-        .classList
-        .remove('oculto');
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-
-}
-
-
-function ocultarFormulario() {
-
-    document
-        .getElementById('formulario')
-        .classList
-        .add('oculto');
-
-}
-
-
-function resetFormulario() {
-
-    const form = document.getElementById('formularioAnotacion');
-
-    form.action = '/planeador/<%= usuarioId %>/crear';
-    form.reset();
-
-    document.getElementById('tituloFormulario').textContent = '➕ Nueva anotación';
-    document.getElementById('botonGuardar').textContent = '💾 Guardar anotación';
-
-}
-
-
-function mostrarFormularioNuevo() {
-
-    resetFormulario();
-    mostrarFormulario();
-
-}
-
-
-function editarAnotacion(boton) {
-
-    const datos = boton.dataset;
-
-    const form = document.getElementById('formularioAnotacion');
-
-    form.action = '/planeador/<%= usuarioId %>/editar/' + datos.id;
-
-    document.getElementById('campoTitulo').value = datos.titulo;
-    document.getElementById('campoDescripcion').value = datos.descripcion;
-    document.getElementById('campoFecha').value = datos.fecha;
-    document.getElementById('campoCategoria').value = datos.categoria;
-    document.getElementById('campoEstado').value = datos.estado;
-
-    document.getElementById('tituloFormulario').textContent = ' Editar anotación';
-    document.getElementById('botonGuardar').textContent = ' Guardar cambios';
-
-    mostrarFormulario();
-
-}
-
-
-function filtrar(estado, boton) {
-
-    const anotaciones =
-        document.querySelectorAll('.anotacion');
-
-    document
-        .querySelectorAll('.filtro')
-        .forEach(b => b.classList.remove('activo'));
-
-    boton.classList.add('activo');
-
-
-    anotaciones.forEach(anotacion => {
-
-        if (
-            estado === 'todas' ||
-            anotacion.dataset.estado === estado
-        ) {
-
-            anotacion.style.display = 'block';
-
-        } else {
-
-            anotacion.style.display = 'none';
-
-        }
-
-    });
-
-}
-
-</script>
-
+      <aside class="planeador-lateral">
+        <section class="seccion bloque-lateral">
+          <div class="encabezado-seccion"><div><p class="sobrelinea">ESTA SEMANA</p><h2>Tareas</h2></div><a href="/tareas/<%= usuarioId %>?filtro=proximas">Ver todas</a></div>
+          <p class="rango-semana"><%= semana.inicio %> — <%= semana.fin %></p>
+          <% if (tareas.length === 0) { %><p class="vacio-lateral">No tienes tareas para esta semana.</p><% } else { %><ul class="lista-resumen"><% tareas.slice(0, 4).forEach(tarea => { %><li><strong><%= tarea.titulo %></strong><span><%= tarea.materia %> · <%= tarea.fecha_entrega %></span></li><% }) %></ul><% } %>
+        </section>
+        <section class="seccion bloque-lateral recordatorios-lateral">
+          <div class="encabezado-seccion"><div><p class="sobrelinea">PRÓXIMAMENTE</p><h2>Recordatorios</h2></div><a href="/recordatorios/<%= usuarioId %>">Gestionar</a></div>
+          <% if (recordatorios.length === 0) { %><p class="vacio-lateral">No hay entregas próximas.</p><% } else { %><ul class="lista-resumen"><% recordatorios.slice(0, 4).forEach(recordatorio => { %><li><strong><%= recordatorio.titulo %></strong><span><%= recordatorio.materia %> · <%= recordatorio.fecha_entrega %></span></li><% }) %></ul><% } %>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <script>
+    function mostrarFormulario() { const formulario = document.getElementById('formulario'); formulario.classList.remove('oculto'); formulario.scrollIntoView({ behavior: 'smooth', block: 'start' }); document.getElementById('campoTitulo').focus(); }
+    function ocultarFormulario() { document.getElementById('formulario').classList.add('oculto'); }
+    function resetFormulario() { const form = document.getElementById('formularioAnotacion'); form.action = '/planeador/<%= usuarioId %>/crear'; form.reset(); document.getElementById('tituloFormulario').textContent = 'Nueva anotación'; document.getElementById('botonGuardar').textContent = 'Guardar anotación'; }
+    function mostrarFormularioNuevo() { resetFormulario(); mostrarFormulario(); }
+    function editarAnotacion(boton) { const datos = boton.dataset; const form = document.getElementById('formularioAnotacion'); form.action = '/planeador/<%= usuarioId %>/editar/' + datos.id; document.getElementById('campoTitulo').value = datos.titulo; document.getElementById('campoDescripcion').value = datos.descripcion; document.getElementById('campoFecha').value = datos.fecha; document.getElementById('campoCategoria').value = datos.categoria; document.getElementById('campoEstado').value = datos.estado; document.getElementById('tituloFormulario').textContent = 'Editar anotación'; document.getElementById('botonGuardar').textContent = 'Guardar cambios'; mostrarFormulario(); }
+    function filtrar(estado, boton) { const anotaciones = [...document.querySelectorAll('.anotacion-planeador')]; let visibles = 0; document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo')); boton.classList.add('activo'); anotaciones.forEach(anotacion => { const visible = estado === 'todas' || anotacion.dataset.estado === estado; anotacion.hidden = !visible; if (visible) visibles += 1; }); document.getElementById('sinResultadosPlaneador').classList.toggle('oculto', visibles > 0 || anotaciones.length === 0); }
+  </script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar contraseña - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
+</head>
+
+<body class="pagina-tarjeta">
+  <%- include('partials/menu') %>
+  <div class="recuperacion">
+
+    <h1>PLANUTOR</h1>
+
+    <h2>Recuperar contraseña</h2>
+
+    <p class="descripcion">
+      Escribe el correo electrónico que tienes registrado en PLANUTOR.
+      Te enviaremos un código para recuperar tu contraseña.
+    </p>
+
+    <% if (error) { %>
+      <div class="alerta error"><%= error %></div>
+    <% } %>
+
+    <% if (mensaje) { %>
+      <div class="alerta ok"><%= mensaje %></div>
+    <% } %>
+
+    <form action="/recuperar-contrasena" method="POST">
+
+      <input
+        type="email"
+        name="correo"
+        placeholder="Correo electrónico"
+        required
+      >
+
+      <button type="submit">
+        ENVIAR CÓDIGO
+      </button>
+
+    </form>
+
+    <a href="/" class="volver">
+      Volver a iniciar sesión
+    </a>
+
+  </div>
+</body>
+</html>

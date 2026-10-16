@@ -1,0 +1,29 @@
+
+body.login-page {
+  min-height: 100vh;
+  margin: 0;
+  padding: 28px 16px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, .55), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(5, 150, 105, .35), transparent 40%),
+    linear-gradient(135deg, #0B3D91, #2563EB, #E0E7FF);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 32px;
+  box-sizing: border-box;
+  text-align: center;
+  background: rgba(248, 250, 255, .78);
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 5px;
+  box-shadow: 0 24px 65px rgba(11, 61, 145, .25);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}

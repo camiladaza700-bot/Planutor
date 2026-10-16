@@ -1,12 +1,13 @@
 const express = require('express');
-const router = express.Router();
 
 const iaController = require('../controllers/iaController');
 
-// POST /ia/preguntar  -> hace la pregunta a Gemini
-router.post('/preguntar', iaController.responderPregunta);
+const router = express.Router();
 
-// GET /ia/estado -> revisa si la clave funciona (diagnostico)
+router.post('/preguntar', iaController.responderPregunta);
+router.get('/conversaciones', iaController.listarConversaciones);
+router.get('/conversaciones/:id', iaController.obtenerConversacion);
+router.delete('/conversaciones/:id', iaController.eliminarConversacion);
 router.get('/estado', iaController.estado);
 
 module.exports = router;

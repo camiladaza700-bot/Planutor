@@ -76,21 +76,67 @@ const Clase = {
     );
   },
 
-  buscarPorCodigo(codigo) {
+  buscarPorIdYProfesor(claseId, profesorId) {
     return get(
       `
-        SELECT
-          id,
-          profesor_id,
-          nombre,
-          grado,
-          codigo,
-          creado_en
+        SELECT id, profesor_id, nombre, grado, codigo, creado_en
+        FROM clases
+        WHERE id = ? AND profesor_id = ?
+      `,
+      [claseId, profesorId]
+    );
+  },
+
+  actualizar(claseId, profesorId, { nombre, grado }) {
+    return run(
+      `
+        UPDATE clases
+        SET nombre = ?, grado = ?
+        WHERE id = ? AND profesor_id = ?
+      `,
+      [nombre, grado, claseId, profesorId]
+    );
+  },
+
+  async eliminar(claseId, profesorId) {
+    await run(
+      `
+        DELETE FROM tarea_estados
+        WHERE tarea_id IN (
+          SELECT id FROM tareas WHERE clase_id = ? AND profesor_id = ?
+        )
+      `,
+      [claseId, profesorId]
+    );
+    await run(
+      'DELETE FROM tareas WHERE clase_id = ? AND profesor_id = ?',
+      [claseId, profesorId]
+    );
+    await run('DELETE FROM estudiantes_clases WHERE clase_id = ?', [claseId]);
+    return run('DELETE FROM clases WHERE id = ? AND profesor_id = ?', [claseId, profesorId]);
+  },
+
+    buscarPorCodigo(codigo) {
+    const limpio = String(codigo).replace(/[^a-z0-9]/gi, '').toUpperCase();
+    const conGuion = limpio.slice(0, 3) + '-' + limpio.slice(3);
+
+    return get(
+      `
+        SELECT id, profesor_id, nombre, grado, codigo, creado_en
         FROM clases
         WHERE codigo = ?
       `,
-      [codigo]
+      [conGuion]
     );
+  },
+
+  async esEstudianteDeClase(claseId, estudianteId) {
+    const fila = await get(
+      'SELECT id FROM estudiantes_clases WHERE clase_id = ? AND estudiante_id = ?',
+      [claseId, estudianteId]
+    );
+
+    return Boolean(fila);
   },
 
   agregarEstudiante(claseId, estudianteId) {
@@ -102,6 +148,13 @@ const Clase = {
         )
         VALUES (?, ?)
       `,
+      [claseId, estudianteId]
+    );
+  },
+
+  retirarEstudiante(claseId, estudianteId) {
+    return run(
+      `DELETE FROM estudiantes_clases WHERE clase_id = ? AND estudiante_id = ?`,
       [claseId, estudianteId]
     );
   },

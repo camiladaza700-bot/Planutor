@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificar código - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
+</head>
+
+<body class="pagina-tarjeta">
+  <%- include('partials/menu') %>
+
+  <main>
+    <h1>PLANUTOR</h1>
+
+    <h2>Verificar código</h2>
+
+    <p>
+      Escribe el código de 6 dígitos que enviamos a tu correo electrónico.
+    </p>
+
+    <% if (error) { %>
+      <p><strong><%= error %></strong></p>
+    <% } %>
+
+    <% if (mensaje) { %>
+      <p><%= mensaje %></p>
+    <% } %>
+
+    <form action="/verificar-recuperacion" method="POST">
+
+      <label for="codigo">Código de recuperación</label>
+
+      <input
+        type="text"
+        id="codigo"
+        name="codigo"
+        inputmode="numeric"
+        pattern="[0-9]{6}"
+        maxlength="6"
+        placeholder="Ej. 394689"
+        required
+      >
+
+      <button type="submit">
+        VERIFICAR CÓDIGO
+      </button>
+
+    </form>
+
+    <p>
+      <a href="/">Volver a iniciar sesión</a>
+    </p>
+
+  </main>
+
+</body>
+</html>

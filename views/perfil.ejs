@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
+</head>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
+  <main class="contenedor">
+    <section class="hero">
+      <h1>Mi perfil</h1>
+      <p>Actualiza la información de tu cuenta y protege tu acceso.</p>
+      <% if (mensaje) { %><div class="alerta ok"><%= mensaje %></div><% } %>
+      <% if (error) { %><div class="alerta error"><%= error %></div><% } %>
+    </section>
+
+    <section class="seccion">
+      <h2>Información personal</h2>
+      <form action="/perfil/<%= usuario.id %>" method="POST">
+        <label>Nombre completo
+          <input type="text" name="nombre" value="<%= usuario.nombre %>" required>
+        </label>
+        <label>Correo electrónico
+          <input type="email" name="correo" value="<%= usuario.correo %>" required>
+        </label>
+        <label>Institución
+          <input type="text" name="institucion" value="<%= usuario.institucion || '' %>" required>
+        </label>
+
+        <% if (usuario.rol === 'estudiante') { %>
+          <label>Nivel
+            <input type="text" name="nivel" value="<%= usuario.nivel || '' %>" required>
+          </label>
+          <label>Grado
+            <input type="text" name="grado" value="<%= usuario.grado || '' %>" required>
+          </label>
+          <label>Grupo
+            <input type="text" name="grupo" value="<%= usuario.grupo || '' %>" required>
+          </label>
+        <% } %>
+
+        <button type="submit">Guardar datos</button>
+      </form>
+    </section>
+
+    <section class="seccion">
+      <h2>Cambiar contraseña</h2>
+      <form action="/perfil/<%= usuario.id %>/contrasena" method="POST">
+        <label>Contraseña actual
+          <input type="password" name="contrasenaActual" autocomplete="current-password" required>
+        </label>
+        <label>Nueva contraseña
+          <input type="password" name="nuevaContrasena" minlength="8" autocomplete="new-password" required>
+        </label>
+        <label>Confirmar nueva contraseña
+          <input type="password" name="confirmarContrasena" minlength="8" autocomplete="new-password" required>
+        </label>
+        <button type="submit">Actualizar contraseña</button>
+      </form>
+    </section>
+
+    <a class="volver" href="/panel/<%= usuario.id %>">← Volver al panel</a>
+  </main>
+</body>
+</html>

@@ -5,13 +5,13 @@ const sqlite3 = require('sqlite3').verbose();
 const ADMIN_SEMILLA = {
   nombre: 'Administrador PLANUTOR',
   correo: 'admin@planutor.edu',
-  passwordHash: 'planutoradminseed:dc99ddbdede275526067f8473dd26e7165c862fbc8f104dc23374de4cf63af6ad6f1607f8c3efb274d4ca0dc8b869f5f44ff7a827f83bba59fca0333d885ea10'
+  passwordHash: 'planutor-admin-demo-2026:bbb81b23a46e4fff4767834c59d4f2f1d84232cfa54ceeffe2f75f3cc8569c69903d00fff4089e9d3782f76728f8543f03edc5ded88e03a9be70704fb2d81c7e'
 };
 
 const PROFESOR_SEMILLA = {
   nombre: 'Profesor Demo',
   correo: 'profesor@planutor.edu',
-  passwordHash: 'planutorprofesorseed:3d6b6c4e27a8b893cea701a137016b8beb9338fc0798aa0c44dd0c63f8f3136d236f022d8e3e08427e1cd361f174bc61210be5b04f41a7cae85b030892802f4a',
+  passwordHash: 'planutor-profe-demo-2026:d5761c61a66d411a0a74a7925ed07a475cc283a2f58ae14947d5cfa3a9bebac93675335f665fc80c306ec1042657819371336f98b972a7fec14947eb9f110878',
   grado: '5',
   grupo: 'General'
 };
@@ -66,6 +66,17 @@ function createTareasTable(nombreTabla = 'tareas') {
 }
 
 function seedData() {
+  if (process.env.NODE_ENV !== 'production') {
+    db.run(
+      'UPDATE usuarios SET password_hash = ? WHERE correo = ?',
+      [ADMIN_SEMILLA.passwordHash, ADMIN_SEMILLA.correo]
+    );
+    db.run(
+      'UPDATE usuarios SET password_hash = ? WHERE correo = ?',
+      [PROFESOR_SEMILLA.passwordHash, PROFESOR_SEMILLA.correo]
+    );
+  }
+
   db.run(
     `
       UPDATE usuarios
@@ -332,6 +343,81 @@ db.serialize(() => {
       titulo TEXT NOT NULL,
       origen TEXT NOT NULL DEFAULT 'personal',
       creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+  `);
+  
+  db.run(`
+    CREATE TABLE IF NOT EXISTS recuperaciones_contrasena (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuario_id INTEGER NOT NULL,
+      codigo_hash TEXT NOT NULL,
+      vence_en INTEGER NOT NULL,
+      usado INTEGER NOT NULL DEFAULT 0,
+      creado_en INTEGER NOT NULL,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS preferencias_recordatorios (
+      usuario_id INTEGER PRIMARY KEY,
+      correo_activo INTEGER NOT NULL DEFAULT 1,
+      dias_anticipacion INTEGER NOT NULL DEFAULT 3,
+      actualizado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS envios_recordatorios (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuario_id INTEGER NOT NULL,
+      tarea_id INTEGER NOT NULL,
+      fecha_envio TEXT NOT NULL,
+      creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (usuario_id, tarea_id, fecha_envio),
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+      FOREIGN KEY (tarea_id) REFERENCES tareas(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS instituciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL UNIQUE,
+      creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ia_conversaciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuario_id INTEGER NOT NULL,
+      titulo TEXT NOT NULL,
+      creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      actualizado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ia_mensajes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      conversacion_id INTEGER NOT NULL,
+      rol TEXT NOT NULL CHECK (rol IN ('usuario', 'asistente')),
+      contenido TEXT NOT NULL,
+      creado_en TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (conversacion_id) REFERENCES ia_conversaciones(id)
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS ia_uso_diario (
+      usuario_id INTEGER NOT NULL,
+      fecha TEXT NOT NULL,
+      solicitudes INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (usuario_id, fecha),
       FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
     )
   `);

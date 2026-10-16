@@ -4,41 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= titulo %> - PLANUTOR</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      font-family: Arial, sans-serif;
-      background: #f7ede2;
-      color: #2d2d2d;
-    }
-    .tarjeta {
-      width: 100%;
-      max-width: 560px;
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 36px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-      text-align: center;
-    }
-    h1 { color: #84a59d; margin-bottom: 14px; }
-    p { margin-bottom: 24px; line-height: 1.5; }
-    a {
-      display: inline-block;
-      padding: 12px 20px;
-      border-radius: 10px;
-      text-decoration: none;
-      background: #f28482;
-      color: #fff;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tema.css">
 </head>
-<body>
+<body class="pagina-tarjeta">
+  <%- include('partials/menu') %>
   <main class="tarjeta">
     <h1><%= titulo %></h1>
     <p><%= mensaje %></p>

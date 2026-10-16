@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cambiar contraseña | PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
+</head>
+<body class="pagina-tarjeta">
+  <%- include('partials/menu') %>
+  <main class="contenedor">
+    <h1>Nueva contraseña</h1>
+    <p>Escribe tu nueva contraseña para recuperar el acceso a tu cuenta.</p>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+      <p class="mensaje"><%= mensaje %></p>
+    <% } %>
+
+    <form action="/cambiar-contrasena" method="POST">
+      <label for="contrasena">Nueva contraseña</label>
+      <input
+        type="password"
+        id="contrasena"
+        name="contrasena"
+        minlength="8"
+        autocomplete="new-password"
+        placeholder="Mínimo 8 caracteres"
+        required
+      >
+
+      <label for="confirmarContrasena">Confirmar contraseña</label>
+      <input
+        type="password"
+        id="confirmarContrasena"
+        name="confirmarContrasena"
+        minlength="8"
+        autocomplete="new-password"
+        placeholder="Escribe la contraseña otra vez"
+        required
+      >
+
+      <button type="submit">GUARDAR NUEVA CONTRASEÑA</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -19,6 +19,21 @@ router.get(
 );
 
 router.post(
+  '/clases/profesor/:profesorId/:claseId/editar',
+  claseController.editarClase
+);
+
+router.post(
+  '/clases/profesor/:profesorId/:claseId/eliminar',
+  claseController.eliminarClase
+);
+
+router.post(
+  '/clases/profesor/:profesorId/:claseId/estudiantes/:estudianteId/retirar',
+  claseController.retirarEstudiante
+);
+
+router.post(
   '/clases/crear',
   claseController.crearClase
 );
@@ -26,6 +41,11 @@ router.post(
 router.post(
   '/clases/unirse',
   claseController.unirseAClase
+);
+
+router.post(
+  '/clases/estudiante/:estudianteId/:claseId/salir',
+  claseController.salirDeClase
 );
 
 module.exports = router;

@@ -1,5 +1,3 @@
-// Carga el .env SIEMPRE desde la carpeta de este archivo,
-// sin importar desde donde se ejecute 'npm start'.
 
 const path = require('path');
 
@@ -7,17 +5,14 @@ require('dotenv').config({
   path: path.join(__dirname, '.env')
 });
 
-const clave = (process.env.GEMINI_API_KEY || '').trim();
-
-if (!clave) {
-  console.warn('[IA] AVISO: no se encontro GEMINI_API_KEY en el .env');
-} else {
-  console.log('[IA] Clave de Gemini cargada desde .env.');
-}
 
 const express = require('express');
+const session = require('express-session');
 
 const { port } = require('./config/env');
+
+const { soloRol, soloYo, soloLogueado } = require('./middlewares/seguridad');
+const { salir } = require('./controllers/authController');
 
 require('./config/db');
 
@@ -28,13 +23,40 @@ const notaRoutes = require('./routes/notaRoutes');
 const recordatorioRoutes = require('./routes/recordatorioRoutes');
 const eventoRoutes = require('./routes/eventoRoutes');
 const iaRoutes = require('./routes/iaRoutes');
+const EventoEscolar = require('./models/eventoModel');
+const Planeador = require('./models/planeadorModel');
+const { iniciarProgramadorRecordatorios } = require('./services/recordatorioService');
 
-// NUEVO: rutas del planeador
 const planeadorRoutes = require('./routes/planeadorRoutes');
 const claseRoutes = require('./routes/claseRoutes');
+const perfilRoutes = require('./routes/perfilRoutes');
 
 
 const app = express();
+
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET es obligatoria en producción.');
+}
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'planutor-clave-temporal',
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    maxAge: 2 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production'
+  }
+
+}));
+
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.usuario || null;
+  res.locals.currentPath = req.path;
+  next();
+});
 
 app.set('view engine', 'ejs');
 
@@ -44,11 +66,37 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
+// Las vistas existentes usan esta URL para el tema compartido.
+app.get('/css/tema.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'estilos.css'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ===============================
-// Rutas principales
-// ===============================
+app.use('/panel/:userId', soloYo('userId'));
+app.use('/planeador/:userId', soloYo('userId'));
+app.use('/tareas/:userId', soloYo('userId'));
+app.use('/perfil/:userId', soloYo('userId'));
+
+app.use('/clases/profesor/:profesorId', soloRol('profesor'), soloYo('profesorId'));
+app.use('/clases/estudiante/:estudianteId', soloRol('estudiante'), soloYo('estudianteId'));
+app.post('/clases/crear', soloRol('profesor'), soloYo('profesorId'));
+app.post('/clases/unirse', soloRol('estudiante'), soloYo('estudianteId'));
+
+app.post('/profesor/tareas', soloRol('profesor'), soloYo('profesorId'));
+app.use('/profesor/tareas/:tareaId', soloRol('profesor'));
+app.post('/estudiante/tareas/:tareaId/estado', soloRol('estudiante'), soloYo('estudianteId'));
+
+app.use('/usuarios', soloRol('administrador'));
+app.use('/instituciones', soloRol('administrador'));
+app.use('/calendario/notas', soloYo('usuarioId'));
+app.use('/recordatorios', soloYo('usuarioId'));
+app.use('/recordatorios/:userId', soloYo('userId'));
+app.post('/eventos-escolares', soloYo('usuarioId'));
+app.post('/eventos-escolares/:id/eliminar', soloYo('usuarioId'));
+
+app.get('/salir', salir);
+
 
 app.use(authRoutes);
 
@@ -61,26 +109,14 @@ app.use(notaRoutes);
 app.use(recordatorioRoutes);
 
 app.use(eventoRoutes);
+app.use('/ia', soloLogueado, iaRoutes);
 
-app.use('/ia', iaRoutes);
-
-// NUEVO: Planeador personal
 app.use('/planeador', planeadorRoutes);
 app.use(claseRoutes);
+app.use(perfilRoutes);
 
+iniciarProgramadorRecordatorios();
 
-app.post('/prueba-ia', async (req, res) => {
-
-  res.json({
-    mensaje: 'La ruta funciona correctamente'
-  });
-
-});
-
-
-// ===============================
-// Ruta raíz: pantalla principal
-// ===============================
 
 app.get('/', (req, res) => {
 
@@ -89,59 +125,43 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/inicio-estudiante', (req, res) => {
+app.get('/inicio-estudiante', soloRol('estudiante'), (req, res) => {
 
   res.render('inicio-estudiante');
 
 });
 
 
-// ===============================
-// Calendario
-// ===============================
+app.get('/calendario', async (req, res) => {
+  const personaje = req.session.usuario?.rol || req.query.personaje || 'estudiante';
+  const currentUserId = req.session.usuario?.id || null;
 
-app.get('/calendario', (req, res) => {
+  try {
+    const [eventos, anotacionesPlaneador] = await Promise.all([
+      EventoEscolar.obtenerTodos(),
+      currentUserId
+        ? Planeador.obtenerPorUsuario(currentUserId)
+        : Promise.resolve([])
+    ]);
 
-  const personaje = req.query.personaje || 'estudiante';
-
-  const currentUserId = req.query.usuarioId
-    ? Number(req.query.usuarioId)
-    : null;
-
-  const eventos = personaje === 'profesor'
-    ? [
-        {
-          fecha: '2026-09-05',
-          titulo: 'Reunión con departamento'
-        },
-        {
-          fecha: '2026-09-12',
-          titulo: 'Entrega de calificaciones'
-        }
-      ]
-    : [
-        {
-          fecha: '2026-09-07',
-          titulo: 'Inicio de clases'
-        },
-        {
-          fecha: '2026-09-20',
-          titulo: 'Entrega de tarea 1'
-        }
-      ];
-
-  res.render('calendario', {
-    personaje,
-    eventos,
-    currentUserId
-  });
-
+    res.render('calendario', {
+      personaje,
+      eventos,
+      anotacionesPlaneador,
+      currentUserId
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', {
+      titulo: 'Error de calendario',
+      mensaje: 'No fue posible cargar los eventos escolares.',
+      volverA: currentUserId ? `/panel/${currentUserId}` : '/',
+      volverTexto: 'Volver al inicio'
+    });
+  }
 });
 
 
-// ===============================
-// Presentación personal
-// ===============================
 
 app.get('/presentacion', (req, res) => {
 
@@ -167,55 +187,14 @@ app.get('/presentacion', (req, res) => {
 });
 
 
-// ===============================
-// Tareas
-// ===============================
-
 app.get('/tareas', (req, res) => {
+  if (!req.session.usuario) {
+    return res.redirect('/');
+  }
 
-  const personaje = req.query.personaje || 'estudiante';
-
-  const tareas = personaje === 'profesor'
-    ? [
-        {
-          id: 1,
-          titulo: 'Publicar plan de clase',
-          fecha: '2026-09-04',
-          estado: 'pendiente'
-        },
-        {
-          id: 2,
-          titulo: 'Revisar evaluaciones',
-          fecha: '2026-09-10',
-          estado: 'en proceso'
-        }
-      ]
-    : [
-        {
-          id: 3,
-          titulo: 'Resolver tarea 1',
-          fecha: '2026-09-20',
-          estado: 'pendiente'
-        },
-        {
-          id: 4,
-          titulo: 'Estudiar para quiz',
-          fecha: '2026-09-15',
-          estado: 'en proceso'
-        }
-      ];
-
-  res.render('tareas', {
-    personaje,
-    tareas
-  });
-
+  return res.redirect(`/tareas/${req.session.usuario.id}`);
 });
 
-
-// ===============================
-// Manejo de rutas inexistentes
-// ===============================
 
 app.use((req, res) => {
 
@@ -227,11 +206,6 @@ app.use((req, res) => {
   });
 
 });
-
-
-// ===============================
-// Iniciar servidor
-// ===============================
 
 app.listen(port, () => {
 

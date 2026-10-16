@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recordatorios - PLANUTOR</title>
+  <link rel="stylesheet" href="/css/tema.css">
+</head>
+<body class="pagina-panel">
+  <%- include('partials/menu') %>
+  <main class="contenedor">
+    <section class="hero">
+      <h1>Recordatorios</h1>
+      <p>Alertas de tareas para los próximos <strong><%= preferencia.dias_anticipacion %></strong> día(s).</p>
+      <% if (mensaje) { %><div class="alerta ok"><%= mensaje %></div><% } %>
+    </section>
+
+    <section class="muro">
+      <h2>Alertas activas</h2>
+      <% if (recordatorios.length === 0) { %>
+        <p class="vacio">No tienes tareas pendientes dentro del período configurado.</p>
+      <% } else { %>
+        <div class="lista">
+          <% recordatorios.forEach(recordatorio => { %>
+            <article class="tarea">
+              <h3><%= recordatorio.titulo %></h3>
+              <p><strong><%= recordatorio.materia %></strong> · Entrega: <%= recordatorio.fecha_entrega %></p>
+              <% if (recordatorio.estado) { %><p>Estado: <%= recordatorio.estado %></p><% } %>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="seccion">
+      <h2>Preferencias de correo</h2>
+      <p>Los correos se envían una vez al día por cada tarea mientras esté dentro del período seleccionado.</p>
+      <form action="/recordatorios/<%= usuario.id %>/configuracion" method="POST">
+        <label>
+          <input type="checkbox" name="correoActivo" <%= preferencia.correo_activo ? 'checked' : '' %>>
+          Recibir recordatorios por correo en <%= usuario.correo %>
+        </label>
+        <label for="diasAnticipacion">Avisarme con</label>
+        <select id="diasAnticipacion" name="diasAnticipacion">
+          <% [1, 3, 7].forEach(dias => { %>
+            <option value="<%= dias %>" <%= Number(preferencia.dias_anticipacion) === dias ? 'selected' : '' %>><%= dias %> día(s) de anticipación</option>
+          <% }) %>
+        </select>
+        <button type="submit">Guardar preferencias</button>
+      </form>
+    </section>
+
+    <a class="volver" href="/panel/<%= usuario.id %>">← Volver al panel</a>
+  </main>
+</body>
+</html>

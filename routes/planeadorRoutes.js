@@ -1,14 +1,14 @@
 const express = require('express');
 const Planeador = require('../models/planeadorModel');
+const Usuario = require('../models/usuarioModel');
+const Tarea = require('../models/tareaModel');
+const Recordatorio = require('../models/recordatorioModel');
 
 const router = express.Router();
 
 
 // MOSTRAR PLANEADOR
 router.get('/:userId', async (req, res) => {
-    console.log('ENTRO AL PLANEADOR');
-    
-    console.log('[PLANEADOR] Entró a la ruta con usuario:', req.params.userId);
   try {
     const usuarioId = Number(req.params.userId);
 
@@ -16,7 +16,37 @@ router.get('/:userId', async (req, res) => {
       return res.status(400).send('Usuario no valido.');
     }
 
+    const usuario = await Usuario.buscarPorId(usuarioId);
+    if (!usuario) {
+      return res.status(404).send('Usuario no encontrado.');
+    }
+
     const anotaciones = await Planeador.obtenerPorUsuario(usuarioId);
+    const semana = Tarea.obtenerRangoSemanaActual();
+    let tareas = [];
+    let recordatorios = [];
+
+    if (usuario.rol === 'profesor') {
+      tareas = await Tarea.obtenerPorProfesorSemana(
+        usuario.id,
+        semana.inicio,
+        semana.fin
+      );
+      recordatorios = await Recordatorio.obtenerParaProfesor(usuario.id);
+    } else if (usuario.rol === 'estudiante') {
+      tareas = await Tarea.obtenerMuroSemana({
+        estudianteId: usuario.id,
+        grado: usuario.grado,
+        grupo: usuario.grupo,
+        semanaInicio: semana.inicio,
+        semanaFin: semana.fin
+      });
+      recordatorios = await Recordatorio.obtenerParaEstudiante({
+        estudianteId: usuario.id,
+        grado: usuario.grado,
+        grupo: usuario.grupo
+      });
+    }
 
     const hoy = new Date().toISOString().split('T')[0];
 
@@ -32,7 +62,11 @@ router.get('/:userId', async (req, res) => {
 
     res.render('planeador', {
       anotaciones,
-      usuarioId
+      usuarioId,
+      usuario,
+      tareas,
+      recordatorios,
+      semana
     });
 
   } catch (error) {
@@ -138,7 +172,5 @@ router.post('/:userId/desarchivar/:id', async (req, res) => {
   }
 });
 
-
-console.log('[PLANEADOR] Rutas cargadas correctamente');
 
 module.exports = router;

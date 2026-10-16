@@ -1,77 +1,54 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Académico</title>
-
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLANUTOR | Iniciar sesión</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="login-page">
 
-    <h1>Sistema Académico</h1>
+  <main class="login-card">
+    <div class="login-avatar">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+      </svg>
+    </div>
 
-    <p>Bienvenido al sistema de gestión académica.</p>
+    <p class="login-brand">PLANUTOR</p>
+    <h1>Iniciar sesión</h1>
+    <p class="login-subtitle">Bienvenido a tu espacio académico</p>
 
-    <hr>
+    <form action="/login" method="POST">
+      <label for="usuario">Usuario</label>
+      <input id="usuario" name="usuario" type="text"
+             placeholder="Ingresa tu usuario" required>
 
-    <h2>Módulos</h2>
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" name="contrasena" type="password"
+             placeholder="Ingresa tu contraseña" required>
 
-    <ul>
-        <li>
-            <a href="/usuarios">Gestionar usuarios</a>
-        </li>
-    </ul>
+      <div class="login-options">
+        <label class="remember-option">
+          <input type="checkbox" name="recordarme">
+          Recordarme
+        </label>
+        <a href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
+      </div>
 
-    <hr>
+      <button type="submit" class="login-button">Ingresar →</button>
+    </form>
 
-    <nav class="topbar">
-        <div class="topbar-left">
-            <a href="/" class="brand">Planificador Escolar</a>
-        </div>
-        <ul class="topbar-links">
-            <li><a id="link-calendario" href="/calendario?personaje=estudiante">Calendario</a></li>
-            <li><a id="link-tareas" href="/tareas?personaje=estudiante">Tareas pendientes</a></li>
-            <li><a id="link-planeador" href="/calendario?personaje=estudiante">Planificador</a></li>
-            <li><a id="link-notas" href="/presentacion?personaje=estudiante">Notas</a></li>
-            <li><a id="link-config" href="/presentacion?personaje=estudiante">Configuración</a></li>
-        </ul>
-
-        <div class="topbar-right">
-            <input id="search" type="search" placeholder="Buscar tareas o notas..." aria-label="Buscar">
-            <label for="personaje">Personaje:</label>
-            <select id="personaje" name="personaje">
-                <option value="estudiante">Estudiante</option>
-                <option value="profesor">Profesor</option>
-            </select>
-        </div>
-    </nav>
-
-    <script>
-        // Actualiza los enlaces de la barra según el personaje seleccionado
-        const select = document.getElementById('personaje');
-        const searchInput = document.getElementById('search');
-        function actualizarEnlaces() {
-            const p = select.value;
-            document.getElementById('link-calendario').href = '/calendario?personaje=' + p;
-            document.getElementById('link-tareas').href = '/tareas?personaje=' + p;
-            document.getElementById('link-planeador').href = '/calendario?personaje=' + p;
-            document.getElementById('link-notas').href = '/presentacion?personaje=' + p;
-            document.getElementById('link-config').href = '/presentacion?personaje=' + p;
-        }
-        select.addEventListener('change', actualizarEnlaces);
-        actualizarEnlaces();
-
-        // Buscar: redirige a /tareas con query
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const q = encodeURIComponent(searchInput.value.trim());
-                const p = select.value;
-                if (q) window.location.href = '/tareas?personaje=' + p + '&search=' + q;
-                else window.location.href = '/tareas?personaje=' + p;
-            }
-        });
-    </script>
+    <div class="login-divider"></div>
+    <p class="login-register">
+      ¿No tienes una cuenta?
+      <a href="/registro-estudiante">Regístrate aquí</a>
+    </p>
+    <p class="login-footer">PLANIFICA · APRENDE · AVANZA</p>
+  </main>
 
 </body>
 </html>
+```

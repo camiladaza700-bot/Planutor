@@ -3,111 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio de sesion - PLANUTOR</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
-      font-family: Arial, sans-serif;
-      background: #f7ede2;
-    }
-    .login {
-      width: 100%;
-      max-width: 420px;
-      background: white;
-      padding: 45px;
-      border-radius: 25px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-    h1 {
-      color: #84a59d;
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
-    h2 {
-      color: #333;
-      margin-bottom: 24px;
-    }
-    .alerta {
-      margin-bottom: 16px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-    .alerta.error {
-      background: #fde2e1;
-      color: #8f2d2c;
-    }
-    .alerta.ok {
-      background: #e3f2ed;
-      color: #2f665a;
-    }
-    input {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      background: #84a59d;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .registro {
-      display: block;
-      margin-top: 20px;
-      color: #f28482;
-      text-decoration: none;
-    }
-  </style>
+  <title>Inicio de sesión - PLANUTOR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/login.css">
 </head>
-<body>
-  <div class="login">
-    <h1>PLANUTOR</h1>
-    <h2>Iniciar sesion</h2>
 
-    <% if (error) { %>
-      <div class="alerta error"><%= error %></div>
-    <% } %>
+<body class="login-page">
+  <main class="login-wrap">
 
-    <% if (mensaje) { %>
-      <div class="alerta ok"><%= mensaje %></div>
-    <% } %>
+    <section class="login-card">
 
-    <form action="/login" method="POST">
-      <input
-        type="email"
-        name="correo"
-        placeholder="Correo electronico"
-        required
-      >
+      <div class="login-avatar" aria-hidden="true">
+        <img src="/logo-planutor.svg" alt="">
+      </div>
 
-      <input
-        type="password"
-        name="password"
-        placeholder="Contrasena"
-        required
-      >
+      <h1>Iniciar sesión</h1>
+      <p class="login-brand">PLANUTOR</p>
 
-      <button type="submit">INICIAR SESION</button>
-    </form>
+      <% if (error) { %>
+        <div class="login-alert error"><%= error %></div>
+      <% } %>
 
-    <a href="/inicio" class="registro">¿Es tu primera vez? Registrarse</a>
-  </div>
+      <% if (mensaje) { %>
+        <div class="login-alert ok"><%= mensaje %></div>
+      <% } %>
+
+      <form action="/login" method="POST">
+
+        <div class="login-field">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="5"/><path d="M2 22c0-6 4.5-9 10-9s10 3 10 9z"/></svg>
+          </span>
+          <input type="email" name="correo" placeholder="Correo electrónico"
+                 autocomplete="email" required>
+        </div>
+
+        <div class="login-field">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10zm2.2 0h5.6V7a2.8 2.8 0 0 0-5.6 0z"/></svg>
+          </span>
+          <input type="password" name="password" placeholder="Contraseña"
+                 autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Entrar</button>
+
+        <div class="login-options">
+          <label class="login-remember">
+            <input type="checkbox" name="recordar" value="1" checked>
+            <span class="box">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>
+            </span>
+            Recordarme
+          </label>
+          <a href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
+        </div>
+      </form>
+
+      <button type="button" class="login-demo-trigger" id="abrirCredenciales">
+        Ver accesos de demostración
+      </button>
+
+    </section>
+
+    <div class="login-divider"></div>
+
+    <p class="login-register">
+      ¿No tienes una cuenta? <a href="/inicio">Regístrate aquí</a>
+    </p>
+
+  </main>
+
+  <dialog class="demo-dialog" id="credencialesDemo" aria-labelledby="tituloCredenciales">
+    <div class="demo-dialog-content">
+      <button type="button" class="demo-dialog-close" id="cerrarCredenciales" aria-label="Cerrar">×</button>
+      <h2 id="tituloCredenciales">Accesos de demostración</h2>
+      <p>Úsalos solo para presentar el proyecto. Elimina este recordatorio antes de publicar.</p>
+      <dl>
+        <div>
+          <dt>Administrador</dt>
+          <dd><strong>Correo:</strong> admin@planutor.edu</dd>
+          <dd><strong>Contraseña:</strong> AdminPlanutor2026</dd>
+        </div>
+        <div>
+          <dt>Profesor</dt>
+          <dd><strong>Correo:</strong> profesor@planutor.edu</dd>
+          <dd><strong>Contraseña:</strong> ProfePlanutor2026</dd>
+        </div>
+                        <div>
+                            <dt>Estudiante</dt>
+                            <dd><strong>Correo:</strong> planutor0@gmail.com</dd>
+                            <dd><strong>Contraseña:</strong> 1234567890</dd>
+                        </div>
+                        <div>
+                            <dt>Estudiante — Laura</dt>
+                            <dd><strong>Correo:</strong> laura.estudiante@planutor.edu</dd>
+                            <dd><strong>Contraseña:</strong> Planutor2026!</dd>
+                        </div>
+                        <div>
+                            <dt>Estudiante — Mateo</dt>
+                            <dd><strong>Correo:</strong> mateo.estudiante@planutor.edu</dd>
+                            <dd><strong>Contraseña:</strong> Planutor2026!</dd>
+                        </div>
+                        <div>
+                            <dt>Profesora — Carolina</dt>
+                            <dd><strong>Correo:</strong> carolina.profesora@iedeboraarango.edu.co</dd>
+                            <dd><strong>Contraseña:</strong> Planutor2026!</dd>
+                        </div>
+                    </dl>
+    </div>
+  </dialog>
+
+  <script>
+    const dialogo = document.getElementById('credencialesDemo');
+
+    document.getElementById('abrirCredenciales').addEventListener('click', () => {
+      dialogo.showModal();
+    });
+
+    document.getElementById('cerrarCredenciales').addEventListener('click', () => {
+      dialogo.close();
+    });
+
+    dialogo.addEventListener('click', (evento) => {
+      if (evento.target === dialogo) dialogo.close();
+    });
+  </script>
 </body>
 </html>
