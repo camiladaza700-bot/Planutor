@@ -59,6 +59,10 @@ async function editar(req, res) {
       return res.redirect(volver('error', 'No puedes quitarte tu propio rol de administrador.'));
     }
 
+    if (rol === 'profesor' && institucion && !await Institucion.buscarPorNombre(institucion)) {
+      return res.redirect(volver('error', 'Selecciona una institución creada por el administrador.'));
+    }
+
     const existente = await Usuario.buscarPorCorreo(email);
     if (existente && existente.id !== id) {
       return res.redirect(volver('error', 'Ese correo ya está registrado.'));

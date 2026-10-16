@@ -92,7 +92,18 @@
                       </select>
                       <% if (currentUser && currentUser.id === usuario.id) { %><input type="hidden" name="rol" value="administrador"><% } %>
                     </label>
-                    <label>Institución <input name="institucion" value="<%= usuario.institucion || '' %>"></label>
+                    <% if (usuario.rol === 'profesor') { %>
+                      <label>Institución
+                        <select name="institucion">
+                          <option value="">Pendiente de asignación</option>
+                          <% instituciones.forEach(institucion => { %>
+                            <option value="<%= institucion.nombre %>" <%= usuario.institucion === institucion.nombre ? 'selected' : '' %>><%= institucion.nombre %></option>
+                          <% }) %>
+                        </select>
+                      </label>
+                    <% } else { %>
+                      <input type="hidden" name="institucion" value="<%= usuario.institucion || '' %>">
+                    <% } %>
                     <label>Nivel <input name="nivel" value="<%= usuario.nivel || '' %>"></label>
                     <label>Grado <input name="grado" value="<%= usuario.grado || '' %>"></label>
                     <label>Grupo <input name="grupo" value="<%= usuario.grupo || '' %>"></label>

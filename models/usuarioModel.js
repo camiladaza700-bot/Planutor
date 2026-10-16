@@ -5,6 +5,7 @@ const { all, get, run, db } = require('../config/db');
 // Migraciones ligeras: si la columna ya existe SQLite devuelve error y la aplicación continúa.
 db.run(`ALTER TABLE usuarios ADD COLUMN institucion TEXT`, () => {});
 db.run(`ALTER TABLE usuarios ADD COLUMN activo INTEGER NOT NULL DEFAULT 1`, () => {});
+db.run(`ALTER TABLE usuarios ADD COLUMN area TEXT`, () => {});
 
 function hashPassword(password) {
   // Cada contraseña usa una sal distinta; nunca se guarda la contraseña original.
@@ -76,7 +77,7 @@ marcarCodigoRecuperacionUsado(id) {
   obtenerTodos() {
     // No incluye password_hash: la administración no necesita ni debe recibirlo.
     const query = `
-      SELECT id, nombre, correo, rol, nivel, grado, grupo, institucion, activo, creado_en
+      SELECT id, nombre, correo, rol, nivel, grado, grupo, institucion, area, activo, creado_en
       FROM usuarios
       ORDER BY datetime(creado_en) DESC, id DESC
     `;
@@ -86,7 +87,7 @@ marcarCodigoRecuperacionUsado(id) {
 
   buscarPorCorreo(correo) {
     const query = `
-      SELECT id, nombre, correo, password_hash, rol, nivel, grado, grupo, institucion, activo, creado_en
+      SELECT id, nombre, correo, password_hash, rol, nivel, grado, grupo, institucion, area, activo, creado_en
       FROM usuarios
       WHERE correo = ?
     `;
@@ -96,7 +97,7 @@ marcarCodigoRecuperacionUsado(id) {
 
   buscarPorId(id) {
     const query = `
-      SELECT id, nombre, correo, password_hash, rol, nivel, grado, grupo, institucion, activo, creado_en
+      SELECT id, nombre, correo, password_hash, rol, nivel, grado, grupo, institucion, area, activo, creado_en
       FROM usuarios
       WHERE id = ?
     `;
@@ -107,8 +108,8 @@ marcarCodigoRecuperacionUsado(id) {
   crear(datos) {
     // La contraseña debe llegar ya transformada por hashPassword desde el controlador.
     const query = `
-      INSERT INTO usuarios (nombre, correo, password_hash, rol, nivel, grado, grupo, institucion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO usuarios (nombre, correo, password_hash, rol, nivel, grado, grupo, institucion, area)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     return run(query, [
@@ -119,7 +120,8 @@ marcarCodigoRecuperacionUsado(id) {
       datos.nivel || null,
       datos.grado || null,
       datos.grupo || null,
-      datos.institucion || null
+      datos.institucion || null,
+      datos.area || null
     ]);
   },
 

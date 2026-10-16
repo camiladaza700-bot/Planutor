@@ -42,25 +42,22 @@ async function actualizarDatos(req, res) {
 
     const nombre = texto(req.body.nombre);
     const nuevoCorreo = correo(req.body.correo);
-    const institucion = texto(req.body.institucion);
+    // La institución de un profesor es asignada por administración y no puede
+    // ser sustituida desde el perfil personal.
+    const institucion = usuario.rol === 'profesor'
+      ? (usuario.institucion || '')
+      : texto(req.body.institucion);
     // Solo el perfil de estudiante puede cambiar su nivel, grado y grupo desde esta pantalla.
     const nivel = usuario.rol === 'estudiante' ? texto(req.body.nivel) : usuario.nivel;
     const grado = usuario.rol === 'estudiante' ? texto(req.body.grado) : usuario.grado;
     const grupo = usuario.rol === 'estudiante' ? texto(req.body.grupo) : usuario.grupo;
 
-    if (!nombre || !nuevoCorreo || !institucion) {
+    if (!nombre || !nuevoCorreo || (usuario.rol !== 'profesor' && !institucion)) {
       return res.redirect(volver(usuarioId, 'error', 'Nombre, correo e institución son obligatorios.'));
     }
 
     if (!/^\S+@\S+\.\S+$/.test(nuevoCorreo)) {
       return res.redirect(volver(usuarioId, 'error', 'Ingresa un correo electrónico válido.'));
-    }
-
-    if (
-      usuario.rol === 'profesor' &&
-      !nuevoCorreo.endsWith('@iedeboraarango.edu.co')
-    ) {
-      return res.redirect(volver(usuarioId, 'error', 'Los profesores deben usar su correo institucional.'));
     }
 
     if (usuario.rol === 'estudiante' && (!nivel || !grado || !grupo)) {

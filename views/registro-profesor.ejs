@@ -4,199 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de profesor - PLANUTOR</title>
-  <link rel="stylesheet" href="/css/tema.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
 </head>
-
-<body class="pagina-tarjeta">
-
-  <div class="contenedor">
-
-    <h1>Registro de profesor</h1>
-
-    <p class="descripcion">
-      Crea tu cuenta de profesor en PLANUTOR.
-    </p>
-
-    <% if (error) { %>
-      <div class="error">
-        <%= error %>
+<body class="login-page registration-page">
+  <main class="login-wrap">
+    <section class="login-card">
+      <div class="login-avatar" aria-hidden="true">
+        <svg class="registration-avatar-icon" viewBox="0 0 64 64">
+          <path d="M5 8h31v25H5zM10 14h21M10 19h14M43 10v32M38 42h10"/>
+          <circle cx="48" cy="24" r="6"/>
+          <path d="M37 53c1-10 6-16 12-16s11 6 12 16M44 40l5 5 5-5"/>
+          <path d="M18 34v12M12 46h12"/>
+        </svg>
       </div>
-    <% } %>
+      <h1>Crear cuenta</h1>
+      <p class="login-brand">PROFESOR · PLANUTOR</p>
 
-    <% if (mensaje) { %>
-      <div class="mensaje">
-        <%= mensaje %>
-      </div>
-    <% } %>
+      <% if (error) { %><div class="login-alert error" role="alert"><%= error %></div><% } %>
+      <% if (mensaje) { %><div class="login-alert ok" role="status"><%= mensaje %></div><% } %>
 
-    <form action="/registro-profesor" method="POST">
-
-      <label>
-        Nombre completo
-        <input
-          type="text"
-          name="nombre"
-          value="<%= valores.nombre %>"
-          required
-        >
-      </label>
-
-      <label>
-        Correo institucional
-        <input
-          type="email"
-          name="correo"
-          placeholder="ejemplo@iedeboraarango.edu.co"
-          value="<%= valores.correo %>"
-          required
-        >
-      </label>
-
-      <label>
-  Materia
-  <select name="area" required>
-    <option value="">Selecciona tu materia</option>
-
-    <option value="Lengua Castellana" <%= valores.area === 'Lengua Castellana' ? 'selected' : '' %>>
-      Lengua Castellana
-    </option>
-
-    <option value="Matemáticas" <%= valores.area === 'Matemáticas' ? 'selected' : '' %>>
-      Matemáticas
-    </option>
-
-    <option value="Ciencias Naturales" <%= valores.area === 'Ciencias Naturales' ? 'selected' : '' %>>
-      Ciencias Naturales
-    </option>
-
-    <option value="Biología" <%= valores.area === 'Biología' ? 'selected' : '' %>>
-      Biología
-    </option>
-
-    <option value="Física" <%= valores.area === 'Física' ? 'selected' : '' %>>
-      Física
-    </option>
-
-    <option value="Química" <%= valores.area === 'Química' ? 'selected' : '' %>>
-      Química
-    </option>
-
-    <option value="Ciencias Sociales" <%= valores.area === 'Ciencias Sociales' ? 'selected' : '' %>>
-      Ciencias Sociales
-    </option>
-
-    <option value="Historia" <%= valores.area === 'Historia' ? 'selected' : '' %>>
-      Historia
-    </option>
-
-    <option value="Geografía" <%= valores.area === 'Geografía' ? 'selected' : '' %>>
-      Geografía
-    </option>
-
-    <option value="Filosofía" <%= valores.area === 'Filosofía' ? 'selected' : '' %>>
-      Filosofía
-    </option>
-
-    <option value="Inglés" <%= valores.area === 'Inglés' ? 'selected' : '' %>>
-      Inglés
-    </option>
-
-    <option value="Francés" <%= valores.area === 'Francés' ? 'selected' : '' %>>
-      Francés
-    </option>
-
-    <option value="Educación Física" <%= valores.area === 'Educación Física' ? 'selected' : '' %>>
-      Educación Física
-    </option>
-
-    <option value="Educación Artística" <%= valores.area === 'Educación Artística' ? 'selected' : '' %>>
-      Educación Artística
-    </option>
-
-    <option value="Música" <%= valores.area === 'Música' ? 'selected' : '' %>>
-      Música
-    </option>
-
-    <option value="Tecnología e Informática" <%= valores.area === 'Tecnología e Informática' ? 'selected' : '' %>>
-      Tecnología e Informática
-    </option>
-
-    <option value="Ética y Valores" <%= valores.area === 'Ética y Valores' ? 'selected' : '' %>>
-      Ética y Valores
-    </option>
-
-    <option value="Religión" <%= valores.area === 'Religión' ? 'selected' : '' %>>
-      Religión
-    </option>
-
-    <option value="Economía" <%= valores.area === 'Economía' ? 'selected' : '' %>>
-      Economía
-    </option>
-
-    <option value="Ciencias Políticas" <%= valores.area === 'Ciencias Políticas' ? 'selected' : '' %>>
-      Ciencias Políticas
-    </option>
-
-    <option value="Emprendimiento" <%= valores.area === 'Emprendimiento' ? 'selected' : '' %>>
-      Emprendimiento
-    </option>
-
-    <option value="Estadística" <%= valores.area === 'Estadística' ? 'selected' : '' %>>
-      Estadística
-    </option>
-
-    <option value="Lectura Crítica" <%= valores.area === 'Lectura Crítica' ? 'selected' : '' %>>
-      Lectura Crítica
-    </option>
-
-    <option value="Preescolar" <%= valores.area === 'Preescolar' ? 'selected' : '' %>>
-      Preescolar
-    </option>
-
-    <option value="Primaria" <%= valores.area === 'Primaria' ? 'selected' : '' %>>
-      Primaria
-    </option>
-  </select>
-</label>
-
-<label>
-  Institución
-  <input
-    type="text"
-    name="institucion"
-    value="<%= valores.institucion %>"
-    readonly
-  >
-</label>
-      <label>
-        Contraseña
-        <input
-          type="password"
-          name="password"
-          required
-        >
-      </label>
-
-      <label>
-        Confirmar contraseña
-        <input
-          type="password"
-          name="confirmarPassword"
-          required
-        >
-      </label>
-
-      <button type="submit">
-        Crear cuenta
-      </button>
-
-    </form>
-
-    <a class="volver" href="/">
-      ← Volver al inicio de sesión
-    </a>
-
-  </div>
-
+      <form action="/registro-profesor" method="POST">
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="5"/><path d="M2 22c0-6 4.5-9 10-9s10 3 10 9z"/></svg></span><input id="nombre" name="nombre" value="<%= valores.nombre %>" placeholder="Nombre completo" autocomplete="name" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM4 7l8 6 8-6"/></svg></span><input id="correo" name="correo" type="email" value="<%= valores.correo %>" placeholder="Correo electrónico" autocomplete="email" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM7 8h10M7 12h10M7 16h6"/></svg></span><select id="area" name="area" required><option value="">Selecciona tu materia</option><% materias.forEach((materia) => { %><option value="<%= materia %>" <%= valores.area === materia ? 'selected' : '' %>><%= materia %></option><% }) %></select></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10z"/></svg></span><input id="password" name="password" type="password" placeholder="Contraseña (mínimo 8 caracteres)" minlength="8" autocomplete="new-password" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10z"/></svg></span><input id="confirmarPassword" name="confirmarPassword" type="password" placeholder="Confirmar contraseña" minlength="8" autocomplete="new-password" required></div>
+        <button type="submit" class="login-btn">Crear cuenta</button>
+      </form>
+      <p class="registration-note">La institución será asignada por el administrador.</p>
+    </section>
+    <div class="login-divider"></div>
+    <p class="login-register">¿Ya tienes una cuenta? <a href="/">Inicia sesión</a></p>
+  </main>
 </body>
 </html>

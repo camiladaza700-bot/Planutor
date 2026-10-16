@@ -3,67 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PLANUTOR</title>
-  <link rel="stylesheet" href="/css/tema.css">
+  <title>Registro - PLANUTOR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
 </head>
-<body class="pagina-tarjeta">
-  <div class="contenedor">
-    <h1>PLANUTOR</h1>
-    <p>Organiza tu vida academica de manera sencilla.</p>
-
-    <label for="institucionBusqueda">¿Cual es tu institucion?</label>
-    <div class="campo-colegio">
-      <input type="text" id="institucionBusqueda" placeholder="Escribe el nombre de tu colegio..." autocomplete="off">
-      <div class="opciones-colegio" id="institucionOpciones"></div>
-    </div>
-    <input type="hidden" id="institucion" value="">
-
-    <p class="aviso" id="avisoInstitucion">Selecciona tu institucion para continuar.</p>
-
-    <h2>¿Quien eres?</h2>
-    <a href="#" id="linkProfesor" class="boton profesor">Soy profesor</a>
-    <a href="#" id="linkEstudiante" class="boton estudiante">Soy estudiante</a>
- </div>
-
-  <script src="/js/colegios.js"></script>
-  <script>
-    const hidden = document.getElementById('institucion');
-    const aviso = document.getElementById('avisoInstitucion');
-    const linkProfesor = document.getElementById('linkProfesor');
-    const linkEstudiante = document.getElementById('linkEstudiante');
-
-    function actualizarBotones() {
-      const institucion = encodeURIComponent(hidden.value);
-      const habilitado = hidden.value !== '';
-
-      linkProfesor.classList.toggle('habilitado', habilitado);
-      linkEstudiante.classList.toggle('habilitado', habilitado);
-
-      linkProfesor.href = habilitado ? ('/registro-profesor?institucion=' + institucion) : '#';
-      linkEstudiante.href = habilitado ? ('/registro-estudiante?institucion=' + institucion) : '#';
-    }
-
-    function manejarClicSinInstitucion(evento) {
-      if (hidden.value === '') {
-        evento.preventDefault();
-        aviso.classList.add('visible');
-      }
-    }
-
-    initAutocompleteColegio({
-      inputId: 'institucionBusqueda',
-      hiddenId: 'institucion',
-      listId: 'institucionOpciones',
-      onSeleccion: () => {
-        aviso.classList.remove('visible');
-        actualizarBotones();
-      }
-    });
-
-    linkProfesor.addEventListener('click', manejarClicSinInstitucion);
-    linkEstudiante.addEventListener('click', manejarClicSinInstitucion);
-
-    actualizarBotones();
-  </script>
+<body class="login-page">
+  <main class="login-wrap">
+    <section class="login-card role-card">
+      <div class="login-avatar" aria-hidden="true"><img src="/logo-planutor.svg" alt=""></div>
+      <h1>Crear cuenta</h1>
+      <p class="login-brand">PLANUTOR</p>
+      <p class="role-description">Selecciona cómo quieres registrarte.</p>
+      <div class="role-actions">
+        <a href="/registro-profesor" class="login-btn role-button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2M17 5l1.5 1.5L21 3"/></svg>Soy profesor</a>
+        <a href="/registro-estudiante" class="login-btn role-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l9-3 9 3-9 3zM6 10v5c0 2 3 4 6 4s6-2 6-4v-5M21 6v7"/></svg>Soy estudiante</a>
+      </div>
+    </section>
+    <div class="login-divider"></div>
+    <p class="login-register">¿Ya tienes una cuenta? <a href="/">Inicia sesión</a></p>
+  </main>
 </body>
 </html>

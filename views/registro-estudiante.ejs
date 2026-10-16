@@ -4,100 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de estudiante - PLANUTOR</title>
-  <link rel="stylesheet" href="/css/tema.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/login.css">
 </head>
-<body class="pagina-tarjeta">
-  <div class="contenedor">
-    <h1>Registro de estudiante</h1>
-    <p class="subtitulo">Crea tu cuenta en PLANUTOR</p>
+<body class="login-page registration-page">
+  <main class="login-wrap">
+    <section class="login-card">
+      <div class="login-avatar" aria-hidden="true">
+        <svg class="registration-avatar-icon" viewBox="0 0 64 64">
+          <circle cx="23" cy="18" r="7"/>
+          <path d="M12 42c2-10 8-15 16-15 6 0 11 3 14 9"/>
+          <path d="M5 45h40l-5 11H10zM18 45l3-10h18l4 10M26 35l6 6 7-6"/>
+          <path d="M49 15h10v24H49zM51 19h6M51 23h6"/>
+        </svg>
+      </div>
+      <h1>Crear cuenta</h1>
+      <p class="login-brand">ESTUDIANTE · PLANUTOR</p>
 
-    <% if (error) { %>
-      <div class="alerta error"><%= error %></div>
-    <% } %>
+      <% if (error) { %><div class="login-alert error" role="alert"><%= error %></div><% } %>
+      <% if (mensaje) { %><div class="login-alert ok" role="status"><%= mensaje %></div><% } %>
 
-    <% if (mensaje) { %>
-      <div class="alerta ok"><%= mensaje %></div>
-    <% } %>
-
-    <form action="/registro-estudiante" method="POST">
-      <label for="institucion">Institución</label>
-<input
-  type="text"
-  id="institucion"
-  name="institucion"
-  value="<%= valores.institucion %>"
-  readonly
-  required
->
-      <label for="nombre">Nombre completo</label>
-      <input
-        type="text"
-        id="nombre"
-        name="nombre"
-        placeholder="Escribe tu nombre completo"
-        value="<%= valores.nombre %>"
-        required
-      >
-
-      <label for="correo">Correo electronico</label>
-      <input
-        type="email"
-        id="correo"
-        name="correo"
-        placeholder="ejemplo@gmail.com"
-        value="<%= valores.correo %>"
-        required
-      >
-
-      <label for="nivel">Nivel educativo</label>
-      <select id="nivel" name="nivel" required>
-        <option value="">Selecciona tu nivel</option>
-        <option value="primaria" <%= valores.nivel === 'primaria' ? 'selected' : '' %>>Primaria</option>
-        <option value="bachillerato" <%= valores.nivel === 'bachillerato' ? 'selected' : '' %>>Bachillerato</option>
-      </select>
-
-      <label for="grado">Grado</label>
-      <select id="grado" name="grado" required>
-        <option value="">Selecciona tu grado</option>
-        <% for (let grado = 1; grado <= 11; grado += 1) { %>
-          <option value="<%= grado %>" <%= valores.grado === String(grado) ? 'selected' : '' %>><%= grado %>°</option>
-        <% } %>
-      </select>
-
-      <label for="grupo">Grupo</label>
-      <input
-        type="text"
-        id="grupo"
-        name="grupo"
-        placeholder="Ejemplo: 10A"
-        value="<%= valores.grupo %>"
-        required
-      >
-
-      <label for="password">Contrasena</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        placeholder="Crea tu contrasena"
-        required
-      >
-
-      <label for="confirmarPassword">Confirmar contrasena</label>
-      <input
-        type="password"
-        id="confirmarPassword"
-        name="confirmarPassword"
-        placeholder="Repite tu contrasena"
-        required
-      >
-
-      <button type="submit">REGISTRARME</button>
-    </form>
-
-    <a href="/" class="volver">Volver</a>
-  </div>
-
-  
+      <form action="/registro-estudiante" method="POST">
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21h18V9H3zm4-8h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2zM2 7l10-5 10 5z"/></svg></span><select id="institucion" name="institucion" required><% if (instituciones.length === 0) { %><option value="" selected disabled>No hay instituciones disponibles</option><% } else { %><option value="">Selecciona tu institución</option><% instituciones.forEach((institucion) => { %><option value="<%= institucion.nombre %>" <%= valores.institucion === institucion.nombre ? 'selected' : '' %>><%= institucion.nombre %></option><% }) %><% } %></select></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="5"/><path d="M2 22c0-6 4.5-9 10-9s10 3 10 9z"/></svg></span><input id="nombre" name="nombre" value="<%= valores.nombre %>" placeholder="Nombre completo" autocomplete="name" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM4 7l8 6 8-6"/></svg></span><input id="correo" name="correo" type="email" value="<%= valores.correo %>" placeholder="Correo electrónico" autocomplete="email" required></div>
+        <div class="registration-row">
+          <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM7 8h10M7 12h10M7 16h6"/></svg></span><select id="nivel" name="nivel" required><option value="">Nivel educativo</option><option value="primaria" <%= valores.nivel === 'primaria' ? 'selected' : '' %>>Primaria</option><option value="bachillerato" <%= valores.nivel === 'bachillerato' ? 'selected' : '' %>>Bachillerato</option></select></div>
+          <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg></span><select id="grado" name="grado" required><option value="">Grado</option><% for (let grado = 1; grado <= 11; grado += 1) { %><option value="<%= grado %>" <%= valores.grado === String(grado) ? 'selected' : '' %>><%= grado %>°</option><% } %></select></div>
+        </div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg></span><input id="grupo" name="grupo" value="<%= valores.grupo %>" placeholder="Grupo (ej.: 10A)" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10z"/></svg></span><input id="password" name="password" type="password" placeholder="Contraseña (mínimo 8 caracteres)" minlength="8" autocomplete="new-password" required></div>
+        <div class="login-field"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10z"/></svg></span><input id="confirmarPassword" name="confirmarPassword" type="password" placeholder="Confirmar contraseña" minlength="8" autocomplete="new-password" required></div>
+        <button type="submit" class="login-btn">Crear cuenta</button>
+      </form>
+    </section>
+    <div class="login-divider"></div>
+    <p class="login-register">¿Ya tienes una cuenta? <a href="/">Inicia sesión</a></p>
+  </main>
+  <script>
+    const nivel = document.getElementById('nivel');
+    const grado = document.getElementById('grado');
+    function actualizarGrados() {
+      Array.from(grado.options).forEach((opcion) => {
+        if (!opcion.value) return;
+        const numero = Number(opcion.value);
+        const permitido = nivel.value === 'primaria' ? numero <= 5 : nivel.value === 'bachillerato' && numero >= 6;
+        opcion.hidden = !permitido;
+        opcion.disabled = !permitido;
+      });
+      if (grado.selectedOptions[0] && grado.selectedOptions[0].disabled) grado.value = '';
+    }
+    nivel.addEventListener('change', actualizarGrados);
+    actualizarGrados();
+  </script>
 </body>
 </html>

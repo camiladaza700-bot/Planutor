@@ -24,6 +24,30 @@ function normalizarCorreo(correo) {
   return normalizarTexto(correo).toLowerCase();
 }
 
+function esCorreoValido(correo) {
+  // La validación del navegador mejora la experiencia, pero esta comprobación
+  // protege igualmente las peticiones que no provienen del formulario.
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+}
+
+function obtenerContrasena(valor) {
+  // No se recortan contraseñas: modificar una contraseña enviada por la
+  // persona usuaria hace que se registre una distinta a la que escribió.
+  return typeof valor === 'string' ? valor : '';
+}
+
+function esContrasenaValida(password) {
+  return password.length >= 8;
+}
+
+function esGradoValido(nivel, grado) {
+  const numero = Number(grado);
+  return Number.isInteger(numero) && (
+    (nivel === 'primaria' && numero >= 1 && numero <= 5) ||
+    (nivel === 'bachillerato' && numero >= 6 && numero <= 11)
+  );
+}
+
 function valoresEstudiante(body = {}) {
   return {
     nombre: normalizarTexto(body.nombre),
@@ -66,8 +90,7 @@ function valoresProfesor(body = {}) {
   return {
     nombre: normalizarTexto(body.nombre),
     correo: normalizarCorreo(body.correo),
-    area: normalizarTexto(body.area),
-    institucion: normalizarTexto(body.institucion)
+    area: normalizarTexto(body.area)
   };
 }
 
@@ -85,10 +108,12 @@ function renderCodigoProfesor(res, datos = {}) {
   });
 }
 
-function renderRegistroEstudiante(res, datos = {}) {
+async function renderRegistroEstudiante(res, datos = {}) {
+  const instituciones = await Institucion.obtenerTodas();
   res.render('registro-estudiante', {
     error: datos.error || '',
     mensaje: datos.mensaje || '',
+    instituciones,
     valores: datos.valores || {
       nombre: '',
       correo: '',
@@ -96,6 +121,19 @@ function renderRegistroEstudiante(res, datos = {}) {
       grado: '',
       grupo: '',
       institucion: datos.institucionInicial || ''
+    }
+  });
+}
+
+function renderRegistroProfesor(res, datos = {}) {
+  res.render('registro-profesor', {
+    error: datos.error || '',
+    mensaje: datos.mensaje || '',
+    materias: MATERIAS_PROFESOR,
+    valores: datos.valores || {
+      nombre: '',
+      correo: '',
+      area: ''
     }
   });
 }
@@ -457,31 +495,21 @@ async function mostrarInicio(req, res) {
 }
 
 async function mostrarRegistroProfesor(req, res) {
-  res.render('registro-profesor', {
-    error: '',
-    mensaje: '',
-    valores: {
-      nombre: '',
-      correo: '',
-      area: '',
-      institucion: normalizarTexto(req.query.institucion)
-    }
-  });
+  renderRegistroProfesor(res);
 }
 async function registrarProfesor(req, res) {
   const valores = valoresProfesor(req.body);
-  const password = normalizarTexto(req.body.password);
-  const confirmarPassword = normalizarTexto(req.body.confirmarPassword);
+  const password = obtenerContrasena(req.body.password);
+  const confirmarPassword = obtenerContrasena(req.body.confirmarPassword);
 
   if (
     !valores.nombre ||
     !valores.correo ||
     !valores.area ||
-    !valores.institucion ||
     !password ||
     !confirmarPassword
   ) {
-    return res.status(400).render('registro-profesor', {
+    return renderRegistroProfesor(res.status(400), {
       error: 'Todos los campos son obligatorios.',
       mensaje: '',
       valores
@@ -491,7 +519,7 @@ async function registrarProfesor(req, res) {
   const partesNombre = valores.nombre.split(/\s+/).filter(Boolean);
 
   if (partesNombre.length < 2) {
-    return res.status(400).render('registro-profesor', {
+    return renderRegistroProfesor(res.status(400), {
       error: 'Escribe tu nombre completo, incluyendo al menos un nombre y un apellido.',
       mensaje: '',
       valores
@@ -507,24 +535,32 @@ async function registrarProfesor(req, res) {
     .join(' ');
 
   if (!MATERIAS_PROFESOR.includes(valores.area)) {
-    return res.status(400).render('registro-profesor', {
+    return renderRegistroProfesor(res.status(400), {
       error: 'Selecciona una materia válida de la lista.',
       mensaje: '',
       valores
     });
   }
 
-  if (!valores.correo.endsWith('@iedeboraarango.edu.co')) {
-    return res.status(400).render('registro-profesor', {
-      error: 'Debes usar tu correo institucional.',
+  if (!esCorreoValido(valores.correo)) {
+    return renderRegistroProfesor(res.status(400), {
+      error: 'Escribe un correo electrónico válido.',
       mensaje: '',
       valores
     });
   }
 
   if (password !== confirmarPassword) {
-    return res.status(400).render('registro-profesor', {
+    return renderRegistroProfesor(res.status(400), {
       error: 'Las contraseñas no coinciden.',
+      mensaje: '',
+      valores
+    });
+  }
+
+  if (!esContrasenaValida(password)) {
+    return renderRegistroProfesor(res.status(400), {
+      error: 'La contraseña debe tener al menos 8 caracteres.',
       mensaje: '',
       valores
     });
@@ -534,7 +570,7 @@ async function registrarProfesor(req, res) {
     const existente = await Usuario.buscarPorCorreo(valores.correo);
 
     if (existente) {
-      return res.status(409).render('registro-profesor', {
+      return renderRegistroProfesor(res.status(409), {
         error: 'Ya existe una cuenta con ese correo.',
         mensaje: '',
         valores
@@ -542,19 +578,18 @@ async function registrarProfesor(req, res) {
     }
 
     await Usuario.crear({
-  nombre: valores.nombre,
-  correo: valores.correo,
-  institucion: valores.institucion,
-  materia: valores.area,
-  passwordHash: Usuario.hashPassword(password),
-  rol: 'profesor'
-});
+      nombre: valores.nombre,
+      correo: valores.correo,
+      area: valores.area,
+      passwordHash: Usuario.hashPassword(password),
+      rol: 'profesor'
+    });
 
     res.redirect('/?registro=ok');
   } catch (error) {
     console.error(error);
 
-    res.status(500).render('registro-profesor', {
+    renderRegistroProfesor(res.status(500), {
       error: 'No fue posible registrar al profesor.',
       mensaje: '',
       valores
@@ -569,7 +604,7 @@ async function validarCodigoProfesor(req, res) {
 }
 
 async function mostrarRegistroEstudiante(req, res) {
-  renderRegistroEstudiante(res, {
+  return renderRegistroEstudiante(res, {
     institucionInicial: normalizarTexto(req.query.institucion)
   });
 }
@@ -577,30 +612,69 @@ async function mostrarRegistroEstudiante(req, res) {
 async function registrarEstudiante(req, res) {
   const valores = valoresEstudiante(req.body);
   valores.nombre = normalizarNombre(valores.nombre);
-  const password = normalizarTexto(req.body.password);
-  const confirmarPassword = normalizarTexto(req.body.confirmarPassword);
+  const password = obtenerContrasena(req.body.password);
+  const confirmarPassword = obtenerContrasena(req.body.confirmarPassword);
 
   if (!valores.nombre || !valores.correo || !valores.institucion || !valores.nivel || !valores.grado || !valores.grupo || !password || !confirmarPassword) {
-    renderRegistroEstudiante(res.status(400), {
+    return renderRegistroEstudiante(res.status(400), {
       error: 'Todos los campos son obligatorios.',
       valores
     });
     return;
   }
 
+  if (valores.nombre.split(/\s+/).length < 2) {
+    return renderRegistroEstudiante(res.status(400), {
+      error: 'Escribe tu nombre completo, incluyendo al menos un nombre y un apellido.',
+      valores
+    });
+    return;
+  }
+
+  if (!esCorreoValido(valores.correo)) {
+    return renderRegistroEstudiante(res.status(400), {
+      error: 'Escribe un correo electrónico válido.',
+      valores
+    });
+    return;
+  }
+
+  if (!['primaria', 'bachillerato'].includes(valores.nivel) || !esGradoValido(valores.nivel, valores.grado)) {
+    return renderRegistroEstudiante(res.status(400), {
+      error: 'El grado no corresponde al nivel educativo seleccionado.',
+      valores
+    });
+    return;
+  }
+
   if (password !== confirmarPassword) {
-    renderRegistroEstudiante(res.status(400), {
+    return renderRegistroEstudiante(res.status(400), {
       error: 'Las contrasenas no coinciden.',
       valores
     });
     return;
   }
 
+  if (!esContrasenaValida(password)) {
+    return renderRegistroEstudiante(res.status(400), {
+      error: 'La contraseña debe tener al menos 8 caracteres.',
+      valores
+    });
+    return;
+  }
+
   try {
+    if (!await Institucion.buscarPorNombre(valores.institucion)) {
+      return renderRegistroEstudiante(res.status(400), {
+        error: 'Selecciona una institución registrada.',
+        valores
+      });
+    }
+
     const existente = await Usuario.buscarPorCorreo(valores.correo);
 
     if (existente) {
-      renderRegistroEstudiante(res.status(409), {
+      return renderRegistroEstudiante(res.status(409), {
         error: 'Ya existe una cuenta con ese correo.',
         valores
       });
@@ -616,7 +690,7 @@ async function registrarEstudiante(req, res) {
     res.redirect('/?registro=ok');
   } catch (error) {
     console.error(error);
-    renderRegistroEstudiante(res.status(500), {
+    return renderRegistroEstudiante(res.status(500), {
       error: 'No fue posible registrar al estudiante.',
       valores
     });

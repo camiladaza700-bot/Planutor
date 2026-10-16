@@ -25,9 +25,13 @@
         <label>Correo electrónico
           <input type="email" name="correo" value="<%= usuario.correo %>" required>
         </label>
-        <label>Institución
-          <input type="text" name="institucion" value="<%= usuario.institucion || '' %>" required>
-        </label>
+        <% if (usuario.rol === 'profesor') { %>
+          <p><strong>Institución:</strong> <%= usuario.institucion || 'Pendiente de asignación por el administrador' %></p>
+        <% } else { %>
+          <label>Institución
+            <input type="text" name="institucion" value="<%= usuario.institucion || '' %>" required>
+          </label>
+        <% } %>
 
         <% if (usuario.rol === 'estudiante') { %>
           <label>Nivel
