@@ -2,10 +2,12 @@ const crypto = require('crypto');
 const { all, get, run, db } = require('../config/db');
 
 // Agrega la columna institucion si todavia no existe (no rompe datos existentes)
+// Migraciones ligeras: si la columna ya existe SQLite devuelve error y la aplicación continúa.
 db.run(`ALTER TABLE usuarios ADD COLUMN institucion TEXT`, () => {});
 db.run(`ALTER TABLE usuarios ADD COLUMN activo INTEGER NOT NULL DEFAULT 1`, () => {});
 
 function hashPassword(password) {
+  // Cada contraseña usa una sal distinta; nunca se guarda la contraseña original.
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');
 
@@ -26,11 +28,13 @@ function verifyPassword(password, passwordHash) {
     return false;
   }
 
+  // La comparación de tiempo constante reduce filtraciones por diferencias de tiempo.
   return crypto.timingSafeEqual(storedBuffer, derivedHash);
 }
 
 const Usuario = {
     guardarCodigoRecuperacion(usuarioId, codigoHash, venceEn) {
+    // Solo se guarda el hash del código temporal enviado por correo, no el código legible.
     const query = `
       INSERT INTO recuperaciones_contrasena
       (usuario_id, codigo_hash, vence_en, usado, creado_en)
@@ -70,6 +74,7 @@ marcarCodigoRecuperacionUsado(id) {
 },
 
   obtenerTodos() {
+    // No incluye password_hash: la administración no necesita ni debe recibirlo.
     const query = `
       SELECT id, nombre, correo, rol, nivel, grado, grupo, institucion, activo, creado_en
       FROM usuarios
@@ -100,6 +105,7 @@ marcarCodigoRecuperacionUsado(id) {
   },
 
   crear(datos) {
+    // La contraseña debe llegar ya transformada por hashPassword desde el controlador.
     const query = `
       INSERT INTO usuarios (nombre, correo, password_hash, rol, nivel, grado, grupo, institucion)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)

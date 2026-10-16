@@ -2,6 +2,7 @@
 const Usuario = require('../models/usuarioModel');
 
 async function validarSesion(req, res) {
+  // No confiamos solo en la cookie: comprobamos que la cuenta siga activa en la base de datos.
   const sesion = req.session.usuario;
   if (!sesion) {
     res.redirect('/');
@@ -16,6 +17,7 @@ async function validarSesion(req, res) {
       return null;
     }
 
+    // Sincroniza el rol por si un administrador lo modificó durante la sesión.
     req.session.usuario.rol = usuario.rol;
     return usuario;
   } catch (error) {
@@ -30,6 +32,7 @@ function soloRol(rol) {
     const usuario = await validarSesion(req, res);
     if (!usuario) return;
 
+    // Protección por rol para rutas exclusivas de profesores, estudiantes o administradores.
     if (usuario.rol !== rol) {
       return res.status(403).send('Acceso denegado');
     }
@@ -49,6 +52,7 @@ function soloYo(campo) {
     const usuario = await validarSesion(req, res);
     if (!usuario) return;
 
+    // Lee el identificador sin importar si llegó por URL, consulta o formulario.
     const id = req.params[campo] ??
       req.query[campo] ??
       (req.body && req.body[campo]);

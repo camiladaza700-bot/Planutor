@@ -2,6 +2,7 @@ const Usuario = require('../models/usuarioModel');
 const Recordatorio = require('../models/recordatorioModel');
 
 async function listar(req, res) {
+  // Esta ruta devuelve JSON para componentes que consultan recordatorios sin recargar la página.
   const usuarioId = Number(req.query.usuarioId);
 
   if (!usuarioId) {
@@ -17,6 +18,7 @@ async function listar(req, res) {
       return;
     }
 
+    // Cada usuario decide cuántos días antes desea recibir la alerta.
     const preferencia = await Recordatorio.obtenerPreferencia(usuario.id);
     let recordatorios = [];
 
@@ -84,6 +86,7 @@ async function guardarConfiguracion(req, res) {
       return res.status(404).send('Usuario no encontrado.');
     }
 
+    // "on" solo llega desde un checkbox marcado; lo convertimos a booleano explícito.
     await Recordatorio.guardarPreferencia({
       usuarioId,
       correoActivo: req.body.correoActivo === 'on',

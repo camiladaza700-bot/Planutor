@@ -1,6 +1,7 @@
 
 const path = require('path');
 
+// Carga secretos y configuración local antes de iniciar cualquier servicio.
 require('dotenv').config({
   path: path.join(__dirname, '.env')
 });
@@ -38,6 +39,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET es obligatoria en producción.');
 }
 
+// La sesión guarda únicamente la identidad del usuario entre solicitudes.
 app.use(session({
   secret: process.env.SESSION_SECRET || 'planutor-clave-temporal',
   resave: false,
@@ -52,6 +54,7 @@ app.use(session({
 
 }));
 
+// Estos datos quedan disponibles automáticamente en todas las vistas EJS.
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.usuario || null;
   res.locals.currentPath = req.path;
@@ -73,6 +76,7 @@ app.get('/css/tema.css', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Evita que alguien cambie un ID en la URL para consultar datos de otra persona.
 app.use('/panel/:userId', soloYo('userId'));
 app.use('/planeador/:userId', soloYo('userId'));
 app.use('/tareas/:userId', soloYo('userId'));
@@ -87,6 +91,7 @@ app.post('/profesor/tareas', soloRol('profesor'), soloYo('profesorId'));
 app.use('/profesor/tareas/:tareaId', soloRol('profesor'));
 app.post('/estudiante/tareas/:tareaId/estado', soloRol('estudiante'), soloYo('estudianteId'));
 
+// Las operaciones de administración solo pueden ser ejecutadas por administradores.
 app.use('/usuarios', soloRol('administrador'));
 app.use('/instituciones', soloRol('administrador'));
 app.use('/calendario/notas', soloYo('usuarioId'));
@@ -109,12 +114,14 @@ app.use(notaRoutes);
 app.use(recordatorioRoutes);
 
 app.use(eventoRoutes);
+// La IA conserva conversaciones por usuario, por eso siempre exige una sesión válida.
 app.use('/ia', soloLogueado, iaRoutes);
 
 app.use('/planeador', planeadorRoutes);
 app.use(claseRoutes);
 app.use(perfilRoutes);
 
+// Inicia una sola vez el proceso que revisa y envía recordatorios pendientes.
 iniciarProgramadorRecordatorios();
 
 
@@ -132,6 +139,7 @@ app.get('/inicio-estudiante', soloRol('estudiante'), (req, res) => {
 });
 
 
+// El calendario combina eventos institucionales con anotaciones personales.
 app.get('/calendario', async (req, res) => {
   const personaje = req.session.usuario?.rol || req.query.personaje || 'estudiante';
   const currentUserId = req.session.usuario?.id || null;

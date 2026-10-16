@@ -277,6 +277,17 @@ body::after { display: none; }
 .menu-enlaces > a.menu-activo { color: var(--azul-noche); background: var(--azul-claro); box-shadow: inset 0 0 0 1px rgba(11, 61, 145, .16); }
 .estrella-actual { display: none; margin-left: 3px; color: #e49a00; font-size: 12px; text-shadow: 0 1px 0 #fff; }
 .menu-activo .estrella-actual { display: inline-block; }
+.boton-gestionar { width: auto; margin: 0; padding: 8px 13px; font-size: 14px; }
+.dialogo-gestion { width: min(620px, calc(100vw - 28px)); max-height: min(760px, calc(100vh - 28px)); padding: 24px; overflow: auto; border: var(--linea); border-radius: 20px; color: var(--texto); background: #fff; box-shadow: 10px 10px 0 var(--azul-cielo); }
+.dialogo-gestion::backdrop { background: rgba(11, 61, 145, .38); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.dialogo-encabezado { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.dialogo-encabezado h2 { margin: 3px 0 0; }
+.cerrar-dialogo { display: grid; width: 36px; height: 36px; place-items: center; padding: 0; border-radius: 50%; color: var(--azul-noche); background: #fff; box-shadow: none; font-size: 27px; line-height: 1; }
+.dialogo-gestion form { display: grid; gap: 12px; margin: 0 0 14px; }
+.dialogo-gestion label { display: grid; gap: 5px; }
+.dialogo-gestion input, .dialogo-gestion select { width: 100%; }
+.dialogo-gestion form button { width: fit-content; margin-top: 2px; }
+.dialogo-gestion .borrar { background: #b42318; }
 .menu-salir { display: grid; width: 36px; height: 36px; place-items: center; padding: 8px; border-radius: 50%; background: #e5484d; }
 .menu-salir:hover { background: #c9363b; }
 .menu-salir img { width: 100%; height: 100%; }

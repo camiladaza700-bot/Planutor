@@ -20,6 +20,7 @@ function fechaHoy() {
 }
 
 function filtrarTareas(tareas, filtro, rol) {
+  // Los filtros se calculan en el servidor para que no dependan de JavaScript del navegador.
   const hoy = fechaHoy();
 
   if (filtro === 'proximas') {
@@ -30,6 +31,7 @@ function filtrarTareas(tareas, filtro, rol) {
   }
 
   if (filtro === 'vencidas') {
+    // Para profesores, una tarea vence cuando aún hay estudiantes sin terminarla.
     return tareas.filter(tarea =>
       tarea.fecha_entrega < hoy &&
       (rol !== 'estudiante' || tarea.estado !== 'terminado') &&
@@ -61,6 +63,7 @@ async function listar(req, res) {
       return mostrarError(res, 404, 'No fue posible cargar las tareas.');
     }
 
+    // Un profesor ve sus publicaciones; un estudiante ve las asignadas a su grado/grupo.
     const todas = usuario.rol === 'profesor'
       ? await Tarea.obtenerTodasPorProfesor(usuario.id)
       : await Tarea.obtenerTodasParaEstudiante({
@@ -91,6 +94,7 @@ async function crear(req, res) {
     }
 
     const volver = `/panel/${profesor.id}`;
+    // Se verifica la pertenencia de la clase antes de permitir crear una tarea en ella.
     const clases = await Clase.obtenerPorProfesor(profesor.id);
     const clase = clases.find((c) => c.id === Number(req.body.claseId));
 
@@ -107,6 +111,7 @@ async function crear(req, res) {
       return mostrarError(res, 400, 'Titulo, descripcion y fecha de entrega son obligatorios.', volver);
     }
 
+    // Se guarda el rango semanal para alimentar el panel y el planeador.
     const semana = Tarea.obtenerRangoSemanaActual();
 
     await Tarea.crear({

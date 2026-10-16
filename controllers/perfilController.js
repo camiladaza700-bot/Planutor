@@ -1,6 +1,7 @@
 const Usuario = require('../models/usuarioModel');
 
 function texto(valor) {
+  // Evita guardar espacios al inicio/final y valores no textuales enviados por formularios.
   return typeof valor === 'string' ? valor.trim() : '';
 }
 
@@ -42,6 +43,7 @@ async function actualizarDatos(req, res) {
     const nombre = texto(req.body.nombre);
     const nuevoCorreo = correo(req.body.correo);
     const institucion = texto(req.body.institucion);
+    // Solo el perfil de estudiante puede cambiar su nivel, grado y grupo desde esta pantalla.
     const nivel = usuario.rol === 'estudiante' ? texto(req.body.nivel) : usuario.nivel;
     const grado = usuario.rol === 'estudiante' ? texto(req.body.grado) : usuario.grado;
     const grupo = usuario.rol === 'estudiante' ? texto(req.body.grupo) : usuario.grupo;
@@ -65,6 +67,7 @@ async function actualizarDatos(req, res) {
       return res.redirect(volver(usuarioId, 'error', 'Nivel, grado y grupo son obligatorios.'));
     }
 
+    // El correo es único; se permite conservarlo cuando pertenece al mismo usuario.
     const existente = await Usuario.buscarPorCorreo(nuevoCorreo);
     if (existente && existente.id !== usuario.id) {
       return res.redirect(volver(usuarioId, 'error', 'Ese correo ya está registrado.'));
@@ -98,6 +101,7 @@ async function cambiarContrasena(req, res) {
       return res.status(404).send('Usuario no encontrado.');
     }
 
+    // Se exige la contraseña actual antes de cambiarla, incluso con una sesión ya iniciada.
     if (!Usuario.verifyPassword(actual, usuario.password_hash)) {
       return res.redirect(volver(usuarioId, 'error', 'La contraseña actual no es correcta.'));
     }
@@ -110,6 +114,7 @@ async function cambiarContrasena(req, res) {
       return res.redirect(volver(usuarioId, 'error', 'Las nuevas contraseñas no coinciden.'));
     }
 
+    // La nueva clave se transforma en hash antes de llegar a la base de datos.
     await Usuario.actualizarPassword(usuario.id, Usuario.hashPassword(nueva));
     res.redirect(volver(usuarioId, 'mensaje', 'Contraseña actualizada correctamente.'));
   } catch (error) {

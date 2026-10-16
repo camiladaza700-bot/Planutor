@@ -72,8 +72,15 @@
               <td><%= usuario.activo ? 'Activa' : 'Desactivada' %></td>
               <td><%= usuario.creado_en %></td>
               <td>
-                <details>
-                  <summary>Gestionar</summary>
+                <button class="boton-gestionar" type="button" onclick="abrirGestionUsuario('gestionUsuario<%= usuario.id %>')">Gestionar</button>
+                <dialog id="gestionUsuario<%= usuario.id %>" class="dialogo-gestion" aria-labelledby="tituloGestionUsuario<%= usuario.id %>">
+                  <div class="dialogo-encabezado">
+                    <div>
+                      <p class="sobrelinea">ADMINISTRACIÓN DE CUENTA</p>
+                      <h2 id="tituloGestionUsuario<%= usuario.id %>"><%= usuario.nombre %></h2>
+                    </div>
+                    <button class="cerrar-dialogo" type="button" onclick="cerrarGestionUsuario('gestionUsuario<%= usuario.id %>')" aria-label="Cerrar ventana">×</button>
+                  </div>
                   <form action="/usuarios/<%= usuario.id %>/editar" method="POST">
                     <label>Nombre <input name="nombre" value="<%= usuario.nombre %>" required></label>
                     <label>Correo <input type="email" name="correo" value="<%= usuario.correo %>" required></label>
@@ -102,7 +109,7 @@
                   <% } else { %>
                     <p>No puedes desactivar ni eliminar tu propia cuenta.</p>
                   <% } %>
-                </details>
+                </dialog>
               </td>
             </tr>
           <% }) %>
@@ -139,5 +146,24 @@
       <% } %>
     </section>
   </main>
+  <script>
+    function abrirGestionUsuario(id) {
+      const dialogo = document.getElementById(id);
+      if (typeof dialogo.showModal === 'function') dialogo.showModal();
+      else dialogo.setAttribute('open', '');
+    }
+
+    function cerrarGestionUsuario(id) {
+      const dialogo = document.getElementById(id);
+      if (typeof dialogo.close === 'function') dialogo.close();
+      else dialogo.removeAttribute('open');
+    }
+
+    document.querySelectorAll('.dialogo-gestion').forEach(dialogo => {
+      dialogo.addEventListener('click', evento => {
+        if (evento.target === dialogo) dialogo.close();
+      });
+    });
+  </script>
 </body>
 </html>

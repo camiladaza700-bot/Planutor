@@ -4,6 +4,7 @@
 const IA = require('../models/iaModel');
 const Usuario = require('../models/usuarioModel');
 
+// Se intenta el modelo recomendado y, si está ocupado, un respaldo compatible.
 const MODELOS = [
   'gemini-3.8-flash',
   'gemini-3-flash-preview'
@@ -20,6 +21,7 @@ const INSTRUCCIONES =
   'responde igual pero de manera corta y apropiada para un colegio. ' +
   'No uses formato markdown con asteriscos, escribe texto plano.';
 
+// Límite por persona para cuidar la cuota gratuita de la API.
 const LIMITE_DIARIO = Number(process.env.IA_LIMITE_DIARIO || 20);
 
 function fechaHoy() {
@@ -27,6 +29,7 @@ function fechaHoy() {
 }
 
 function contextoUsuario(usuario) {
+  // El contexto hace que las respuestas se adapten al grado y al rol, sin exponer la contraseña.
   const datos = [
     `Nombre: ${usuario.nombre}.`,
     `Rol: ${usuario.rol}.`,
@@ -60,9 +63,11 @@ function revisarClave() {
 }
 
 async function llamarGemini(clave, modelo, pregunta, usuario, historial) {
+  // Se manda el historial reciente para que la conversación tenga continuidad.
   const url = `${API_BASE}/${modelo}:generateContent?key=${clave}`;
 
   const cuerpo = {
+    // Estas instrucciones se aplican a toda la conversación y definen el papel del asistente.
     systemInstruction: {
       parts: [{ text: INSTRUCCIONES + contextoUsuario(usuario) }]
     },

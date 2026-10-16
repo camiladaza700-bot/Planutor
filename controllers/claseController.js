@@ -100,12 +100,14 @@ const claseController = {
         return res.status(403).send('Solo un estudiante puede unirse a una clase.');
       }
 
+      // Normalizar el código evita que los espacios o minúsculas impidan encontrar la clase.
       const clase = await Clase.buscarPorCodigo(codigo.trim().toUpperCase());
 
       if (!clase) {
         return res.status(404).send('El código de la clase no existe.');
       }
 
+      // La tabla usa una clave única; por eso el segundo intento no duplica la inscripción.
       const resultado = await Clase.agregarEstudiante(clase.id, estudianteId);
 
       const mensaje = resultado.changes
@@ -128,6 +130,7 @@ async mostrarClaseProfesor(req, res) {
         return res.status(403).send('Acceso no permitido.');
       }
 
+      // Antes de ver o modificar una clase se confirma que pertenece al profesor autenticado.
       const clase = await obtenerClaseDelProfesor(profesorId, claseId);
 
       if (!clase) {
@@ -184,6 +187,7 @@ async mostrarClaseProfesor(req, res) {
         return res.status(403).send('No tienes acceso a esta clase.');
       }
 
+      // El modelo también elimina las tareas y estados asociados a la clase eliminada.
       await Clase.eliminar(claseId, profesorId);
       res.redirect(`/clases/profesor/${profesorId}?mensaje=Clase+eliminada+y+tareas+asociadas+eliminadas.`);
     } catch (error) {
@@ -219,6 +223,7 @@ async mostrarClaseProfesor(req, res) {
       const estudianteId = Number(req.params.estudianteId);
       const claseId = Number(req.params.claseId);
 
+      // La comprobación evita reportar una salida exitosa si no existe la matrícula.
       if (!await Clase.esEstudianteDeClase(claseId, estudianteId)) {
         return res.status(404).send('No perteneces a esta clase.');
       }

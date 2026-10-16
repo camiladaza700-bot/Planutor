@@ -21,11 +21,13 @@ router.get('/:userId', async (req, res) => {
       return res.status(404).send('Usuario no encontrado.');
     }
 
+    // El planeador reúne datos personales y académicos para mostrarlos en una sola vista.
     const anotaciones = await Planeador.obtenerPorUsuario(usuarioId);
     const semana = Tarea.obtenerRangoSemanaActual();
     let tareas = [];
     let recordatorios = [];
 
+    // Cada rol obtiene las tareas desde una fuente diferente: creadas o asignadas.
     if (usuario.rol === 'profesor') {
       tareas = await Tarea.obtenerPorProfesorSemana(
         usuario.id,
@@ -50,6 +52,7 @@ router.get('/:userId', async (req, res) => {
 
     const hoy = new Date().toISOString().split('T')[0];
 
+    // El estado atrasada se calcula al cargar la vista; no altera el estado original guardado.
     for (const anotacion of anotaciones) {
       if (
         anotacion.estado !== 'completada' &&
@@ -81,6 +84,7 @@ router.post('/:userId/crear', async (req, res) => {
   try {
     const usuarioId = Number(req.params.userId);
 
+    // Solo se reciben los campos permitidos del formulario para crear la anotación.
     await Planeador.crear({
       usuarioId,
       titulo: req.body.titulo,

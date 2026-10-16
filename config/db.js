@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
+// Cuentas mínimas para poder probar la aplicación por primera vez en desarrollo.
 const ADMIN_SEMILLA = {
   nombre: 'Administrador PLANUTOR',
   correo: 'admin@planutor.edu',
@@ -16,6 +17,7 @@ const PROFESOR_SEMILLA = {
   grupo: 'General'
 };
 
+// La base SQLite se guarda fuera del código para que los datos persistan entre reinicios.
 const dataDir = path.join(__dirname, '..', 'data');
 const dbPath = path.join(dataDir, 'planutor.sqlite');
 
@@ -30,6 +32,7 @@ const db = new sqlite3.Database(dbPath, (error) => {
   console.log(`SQLite listo en ${dbPath}`);
 });
 
+// Las funciones de esquema centralizan la estructura inicial de las tablas.
 function createUsuariosTable(nombreTabla = 'usuarios') {
   return `
     CREATE TABLE IF NOT EXISTS ${nombreTabla} (
@@ -66,6 +69,7 @@ function createTareasTable(nombreTabla = 'tareas') {
 }
 
 function seedData() {
+  // Las credenciales de demostración solo se restablecen fuera de producción.
   if (process.env.NODE_ENV !== 'production') {
     db.run(
       'UPDATE usuarios SET password_hash = ? WHERE correo = ?',
@@ -77,6 +81,7 @@ function seedData() {
     );
   }
 
+  // INSERT OR IGNORE permite ejecutar la inicialización varias veces sin duplicar usuarios.
   db.run(
     `
       UPDATE usuarios
@@ -133,6 +138,7 @@ function seedData() {
     [PROFESOR_SEMILLA.grado, PROFESOR_SEMILLA.grupo, PROFESOR_SEMILLA.correo]
   );
 
+  // Completa datos que puedan faltar en tareas creadas antes de agregar grado/grupo.
   db.run(
     `
       UPDATE tareas

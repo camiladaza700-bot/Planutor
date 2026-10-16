@@ -6,11 +6,13 @@ function normalizarTexto(valor) {
 }
 
 async function mostrarPagina(req, res) {
+  // usuarioId se usa para saber si se muestra el formulario de creación, no para filtrar eventos.
   const usuarioId = req.query.usuarioId ? Number(req.query.usuarioId) : null;
 
   try {
     const eventos = await EventoEscolar.obtenerTodos();
     const usuario = usuarioId ? await Usuario.buscarPorId(usuarioId) : null;
+    // Todos pueden consultar el calendario escolar; solo estos roles pueden administrarlo.
     const puedeAgregar = Boolean(usuario && (usuario.rol === 'profesor' || usuario.rol === 'administrador'));
 
     res.render('eventos-escolares', {
@@ -63,6 +65,7 @@ async function crear(req, res) {
       return;
     }
 
+    // Se registra quién creó el evento para mantener trazabilidad administrativa.
     await EventoEscolar.crear({ titulo, descripcion, fecha, tipo, creadoPor: usuario.id });
 
     res.redirect(`/eventos-escolares?usuarioId=${usuario.id}`);
@@ -94,6 +97,7 @@ async function eliminar(req, res) {
       return;
     }
 
+    // El middleware ya validó el usuario; esta operación elimina el evento solicitado.
     await EventoEscolar.eliminar(id);
 
     res.redirect(`/eventos-escolares?usuarioId=${usuario.id}`);
